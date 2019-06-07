@@ -1,0 +1,46 @@
+﻿<ContentDialog
+    x:Class="flowpad.Views.WhatsNewDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Uid="WhatsNewDialog"
+    mc:Ignorable="d"
+    d:DesignHeight="345"
+    d:DesignWidth="550">
+    <ContentDialog.TitleTemplate>
+        <DataTemplate x:DataType="x:String">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="ms-appx:///Assets/StoreLogo.png" Width="40" Height="40" />
+                <TextBlock Text="{x:Bind}" Margin="{StaticResource SmallLeftMargin}" VerticalAlignment="Center" />
+            </StackPanel>
+        </DataTemplate>
+    </ContentDialog.TitleTemplate>
+    <ScrollViewer>
+        <StackPanel>
+            <!-- x:Uid="WhatsNew_Body"-->
+            <TextBlock
+               IsTextSelectionEnabled="True"
+                TextWrapping="WrapWholeWords">New Features and changes for update 3.0.1:
+                <LineBreak/>
+                -Added new file management system
+                <LineBreak/>
+                -Fixed an issue where fatal errors occurred crashing the app unexpectantly
+                <LineBreak/>
+                -Open ink drawings from with in the app
+                 <LineBreak/>
+                -Save ink with new  simplified save dialog
+                <LineBreak/>
+                -Save ink with file explorer
+                <LineBreak/>
+                -Added advanced color picker
+                <LineBreak/>
+                -App now adds a local folder to organize and store all your drawings in one place (inkdrawings folder in pictures library)
+                <LineBreak/>
+                -Minor app design changes
+                 <LineBreak/>
+                -Bug fixes and performance improvements
+            </TextBlock>
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

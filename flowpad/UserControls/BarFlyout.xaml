@@ -1,0 +1,73 @@
+﻿<UserControl
+    x:Class="flowpad.UserControls.BarFlyout"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:flowpad.UserControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:animations="using:Microsoft.Toolkit.Uwp.UI.Animations"
+    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <Grid>
+        <Grid Background="Black" Tapped="Backdrop_Tapped">
+
+
+
+            <!--Fade in animation for backdrop-->
+
+            <animations:Implicit.ShowAnimations>
+
+                <animations:OpacityAnimation Duration="0:0:1" From="0" To="0.5"/>
+
+            </animations:Implicit.ShowAnimations>
+
+
+
+            <!--Fade out animation for backdrop-->
+
+            <animations:Implicit.HideAnimations>
+
+                <animations:OpacityAnimation Duration="0:0:1" From="0.5" To="0"/>
+
+            </animations:Implicit.HideAnimations>
+
+        </Grid>
+
+
+
+        <controls:DropShadowPanel Margin="40,20" HorizontalAlignment="Left" Color="Black" BlurRadius="30" ShadowOpacity="1">
+
+            <!--Panel content-->
+
+            <Grid Background="{ThemeResource SystemControlChromeHighAcrylicElementMediumBrush}" Width="520">
+
+                <ContentPresenter x:Name="Presenter"/>
+
+            </Grid>
+
+
+
+            <!--Fly in animation-->
+
+            <animations:Implicit.ShowAnimations>
+
+                <animations:TranslationAnimation Duration="0:0:0.5" From="-500, 0, 0" To="0"/>
+
+            </animations:Implicit.ShowAnimations>
+
+
+
+            <!--Fly out animation-->
+
+            <animations:Implicit.HideAnimations>
+
+                <animations:TranslationAnimation Duration="0:0:0.5" From="0" To="-600, 0, 0"/>
+
+            </animations:Implicit.HideAnimations>
+
+        </controls:DropShadowPanel>
+    </Grid>
+</UserControl>
