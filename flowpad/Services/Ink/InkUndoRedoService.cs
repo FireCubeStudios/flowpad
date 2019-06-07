@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using flowpad.EventHandlers.Ink;
-using flowpad.Services.Ink.UndoRedo;
-
+using Flowpad.Services.Ink.UndoRedo;
 using Windows.UI.Input.Inking;
 using Windows.UI.Xaml.Controls;
 

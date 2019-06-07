@@ -21,21 +21,9 @@
             <!-- x:Uid="WhatsNew_Body"-->
             <TextBlock
                IsTextSelectionEnabled="True"
-                TextWrapping="WrapWholeWords">New Features and changes for update 3.0.1:
+                TextWrapping="WrapWholeWords">New Features and changes for update 3.1.2:
                 <LineBreak/>
-                -Added new file management system
-                <LineBreak/>
-                -Fixed an issue where fatal errors occurred crashing the app unexpectantly
-                <LineBreak/>
-                -Open ink drawings from with in the app
-                 <LineBreak/>
-                -Save ink with new  simplified save dialog
-                <LineBreak/>
-                -Save ink with file explorer
-                <LineBreak/>
-                -Added advanced color picker
-                <LineBreak/>
-                -App now adds a local folder to organize and store all your drawings in one place (inkdrawings folder in pictures library)
+                -Open sourced app on github 
                 <LineBreak/>
                 -Minor app design changes
                  <LineBreak/>

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using flowpad.Services.Ink;
-using flowpad.Services.Ink.UndoRedo;
+using Flowpad.Services.Ink.UndoRedo;
 using Windows.UI;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
