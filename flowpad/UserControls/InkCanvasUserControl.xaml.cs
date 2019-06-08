@@ -27,6 +27,10 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 using Flowpad.Services.Ink.UndoRedo;
+using Microsoft.Graphics.Canvas;
+using Windows.Graphics.Imaging;
+using Windows.Graphics.Display;
+using System.Runtime.InteropServices.WindowsRuntime;
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace flowpad.UserControls
@@ -493,7 +497,16 @@ namespace flowpad.UserControls
                 inkCanvas.InkPresenter.InputDeviceTypes &= ~CoreInputDeviceTypes.Mouse;
             }
         }
+        private void MyColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
+        {
+            InkDrawingAttributes drawingAttributes = inkCanvas.InkPresenter.CopyDefaultDrawingAttributes();
 
+            // Assign the selected color to a variable to use outside the popup.
+            Windows.UI.Color mycolor = myColorPicker.Color;
+            drawingAttributes.Color = mycolor;
+            inkCanvas.InkPresenter.UpdateDefaultDrawingAttributes(drawingAttributes);
+
+        }
         private async void SaveInkFileInApp_Click(object sender, RoutedEventArgs e)
         {
             IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
@@ -588,6 +601,7 @@ namespace flowpad.UserControls
             }
 
         }
+       
 
         private async void SaveFileDialogPrompt_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
@@ -595,16 +609,7 @@ namespace flowpad.UserControls
             await fileService.SaveInkAsync();
         }
 
-        private void MyColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
-        {
-            InkDrawingAttributes drawingAttributes = inkCanvas.InkPresenter.CopyDefaultDrawingAttributes();
-
-            // Assign the selected color to a variable to use outside the popup.
-            Windows.UI.Color mycolor = myColorPicker.Color;
-            drawingAttributes.Color = mycolor;
-            inkCanvas.InkPresenter.UpdateDefaultDrawingAttributes(drawingAttributes);
-
-        }
+      
 
 
         private async void Openlocation_ClickAsync(ContentDialog sender, ContentDialogButtonClickEventArgs e)
@@ -673,19 +678,99 @@ namespace flowpad.UserControls
         }
         private async void OpenFileDialogPrompt_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            Windows.Storage.StorageFile file = await StorageFile.GetFileFromPathAsync(FileOpen);
-            
+            try
+            {
+                Windows.Storage.StorageFile file = await StorageFile.GetFileFromPathAsync(FileOpen);
+
                 // Open a file stream for reading.
                 IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
                 // Read from file.
-             
-                    using (var inputStream = stream.GetInputStreamAt(0))
-                    {
-                        await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
-                    }
-                
-        }
 
+                using (var inputStream = stream.GetInputStreamAt(0))
+                {
+                    await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                }
+            }
+            catch
+            {
+                return;
+            }
+        }
+        private async void SaveFileAsImage(object sender, RoutedEventArgs e)
+        {
+            IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+            if (currentStrokes.Count == 0)
+            {
+                return;
+            }
+            else
+            {
+                string SelectedItem = "{x:Bind SelectedItem}";
+                string textbog = "{x:Bind E.Text mode=OneWay}";
+                string gob = (textbog + SelectedItem);
+                //  StorageFolder storageFolder = KnownFolders.SavedPictures;
+                // var file = await storageFolder.CreateFileAsync(gob, CreationCollisionOption.ReplaceExisting);
+
+                CanvasDevice device = CanvasDevice.GetSharedDevice();
+                CanvasRenderTarget renderTarget = new CanvasRenderTarget(device, (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight, 96);
+
+
+
+                Windows.Storage.Pickers.FileSavePicker savePicker =
+                          new Windows.Storage.Pickers.FileSavePicker();
+                savePicker.SuggestedStartLocation =
+                    Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+                savePicker.FileTypeChoices.Add(".jpeg format", new List<string>() { ".jpeg" });
+                savePicker.FileTypeChoices.Add(".Png format", new List<string>() { ".png" });
+                savePicker.FileTypeChoices.Add(
+                   ".Bmp format",
+                   new List<string>() { ".bmp" });
+                savePicker.FileTypeChoices.Add(
+                   ".gif format",
+                   new List<string>() { ".gif" });
+
+                savePicker.FileTypeChoices.Add(
+                                 ".jpegxr format",
+                                 new List<string>() { ".jpegxr" });
+                savePicker.FileTypeChoices.Add(
+                 ".tiff format",
+                 new List<string>() { ".tiff" });
+                savePicker.DefaultFileExtension = ".jpeg";
+                savePicker.SuggestedFileName = "Inkdrawing";
+
+                // Show the file picker.
+                Windows.Storage.StorageFile file =
+                    await savePicker.PickSaveFileAsync();
+                if (file != null)
+                {
+                    RenderTargetBitmap rtb = new RenderTargetBitmap();
+                    await rtb.RenderAsync(inkCanvas);
+
+                    var pixelBuffer = await rtb.GetPixelsAsync();
+                    var pixels = pixelBuffer.ToArray();
+                    var displayInformation = DisplayInformation.GetForCurrentView();
+
+                    using (var fileStream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite))
+                    {
+                        var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, fileStream);
+                        encoder.SetPixelData(BitmapPixelFormat.Bgra8,
+                                             BitmapAlphaMode.Premultiplied,
+                                             (uint)rtb.PixelWidth,
+                                             (uint)rtb.PixelHeight,
+                                             displayInformation.RawDpiX,
+                                             displayInformation.RawDpiY,
+                                             pixels);
+                        await encoder.FlushAsync();
+
+                        // await renderTarget.SaveAsync(fileStream, CanvasBitmapFileFormat.Jpeg, 1f);
+
+                    }
+
+                }
+                // save results
+            }
+
+        }
         private void OpenFileDialogPrompt_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
 

@@ -43,7 +43,9 @@
                     </CommandBar>
                 </Pivot.LeftHeader>
                 <PivotItem TabIndex="0" Header="File">
-                    <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" x:Name="FileBar" IsOpen="False" DefaultLabelPosition="Right" FlowDirection="RightToLeft">
+                    <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" x:Name="FileBar" IsOpen="False" DefaultLabelPosition="Right" FlowDirection="RightToLeft" OverflowButtonVisibility="Collapsed">
+                        <AppBarButton ToolTipService.ToolTip="Export as image" Label="Export as image" Icon="Import" Click="SaveFileAsImage" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                        <AppBarSeparator/>
                         <AppBarButton ToolTipService.ToolTip="Open ink file" x:Uid="Ink_LoadInkFileButton" Icon="OpenFile" Click="LoadInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                         <AppBarButton ToolTipService.ToolTip="Save ink file via file explorer"  Label="Save ink file via file explorer" Icon="SaveLocal" Click="SaveInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                         <!--x:Uid="Ink_SaveInkFileButton"-->
