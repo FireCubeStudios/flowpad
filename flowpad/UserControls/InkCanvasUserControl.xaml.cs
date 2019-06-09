@@ -31,6 +31,11 @@ using Microsoft.Graphics.Canvas;
 using Windows.Graphics.Imaging;
 using Windows.Graphics.Display;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.UI.Xaml.Navigation;
+using Windows.Foundation;
+using Windows.Storage.Pickers;
+
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace flowpad.UserControls
@@ -55,41 +60,9 @@ namespace flowpad.UserControls
         private InkFileService fileService;
         private InkZoomService zoomService;
         public string FileOpen;
+        private StorageFile imageFile;
+        public Boolean FileSaved = false;
         private ElementTheme _elementTheme = ThemeSelectorService.Theme;
-        public bool LassoSelectionButtonIsChecked
-        {
-            get => lassoSelectionButtonIsChecked;
-            set
-            {
-                Set(ref lassoSelectionButtonIsChecked, value);
-                //ConfigLassoSelection(value);
-            }
-        }
-
-        public bool TransformTextAndShapesButtonIsEnabled
-        {
-            get => transformTextAndShapesButtonIsEnabled;
-            set => Set(ref transformTextAndShapesButtonIsEnabled, value);
-        }
-
-
-
-
-        public ElementTheme ElementTheme
-        {
-            get { return _elementTheme; }
-
-            set { Set(ref _elementTheme, value); }
-        }
-
-        private string _versionDescription;
-
-        public string VersionDescription
-        {
-            get { return _versionDescription; }
-
-            set { Set(ref _versionDescription, value); }
-        }
 
         public InkCanvasUserControl()
         {
@@ -134,6 +107,104 @@ namespace flowpad.UserControls
 
 
             }
+
+
+      Windows.UI.Core.Preview.SystemNavigationManagerPreview.GetForCurrentView().CloseRequested +=
+       async (sender, args) =>
+       {
+           try
+           {
+               args.Handled = true;
+               var Folder = await Windows.Storage.KnownFolders.PicturesLibrary.GetFolderAsync("Shared");
+               await Folder.DeleteAsync();
+               IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+               if (currentStrokes.Count == 0 || FileSaved == true)
+               {
+                   App.Current.Exit();
+               }
+               else
+               {
+
+
+                   var result = await SaveInkConfirmDialog.ShowAsync();
+                   if (result == ContentDialogResult.Primary)
+                   {
+                       await SaveFileDialogPrompt.ShowAsync();
+                   }
+                   else if (result == ContentDialogResult.Secondary)
+                   {
+                       SaveFileDialogPrompt.Hide();
+                   }
+                   else
+                   {
+                       App.Current.Exit();
+                   }
+               }
+           }
+           catch
+           {
+               args.Handled = true;
+               IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+               if (currentStrokes.Count == 0 || FileSaved == true)
+               {
+                   App.Current.Exit();
+               }
+               else
+               {
+
+
+                   var result = await SaveInkConfirmDialog.ShowAsync();
+                   if (result == ContentDialogResult.Primary)
+                   {
+                       await SaveFileDialogPrompt.ShowAsync();
+                   }
+                   else if (result == ContentDialogResult.Secondary)
+                   {
+                       SaveFileDialogPrompt.Hide();
+                   }
+                   else
+                   {
+                       App.Current.Exit();
+                   }
+               }
+
+           }
+       };
+        }
+
+        public bool LassoSelectionButtonIsChecked
+        {
+            get => lassoSelectionButtonIsChecked;
+            set
+            {
+                Set(ref lassoSelectionButtonIsChecked, value);
+                //ConfigLassoSelection(value);
+            }
+        }
+
+        public bool TransformTextAndShapesButtonIsEnabled
+        {
+            get => transformTextAndShapesButtonIsEnabled;
+            set => Set(ref transformTextAndShapesButtonIsEnabled, value);
+        }
+
+
+
+
+        public ElementTheme ElementTheme
+        {
+            get { return _elementTheme; }
+
+            set { Set(ref _elementTheme, value); }
+        }
+
+        private string _versionDescription;
+
+        public string VersionDescription
+        {
+            get { return _versionDescription; }
+
+            set { Set(ref _versionDescription, value); }
         }
 
 
@@ -551,7 +622,8 @@ namespace flowpad.UserControls
 
                     if (status == Windows.Storage.Provider.FileUpdateStatus.Complete)
                     {
-                        await SaveFileDialogSaved.ShowAsync(); // the notification will appear for 2 seconds 
+                        await SaveFileDialogSaved.ShowAsync(); // the notification will appear for 2 seconds
+                        FileSaved = true;
                     }
                     else
                     {
@@ -587,7 +659,8 @@ namespace flowpad.UserControls
 
                 if (status == Windows.Storage.Provider.FileUpdateStatus.Complete)
                 {
-                    await SaveFileDialogSaved.ShowAsync(); // the notification will appear for 2 seconds 
+                    await SaveFileDialogSaved.ShowAsync(); // the notification will appear for 2 seconds
+                    FileSaved = true;
                 }
                 else
                 {
@@ -607,6 +680,7 @@ namespace flowpad.UserControls
         {
             ClearSelection();
             await fileService.SaveInkAsync();
+            FileSaved = true;
         }
 
       
@@ -771,11 +845,96 @@ namespace flowpad.UserControls
             }
 
         }
+
         private void OpenFileDialogPrompt_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
 
 
         }
+        public void SelectImageButton_Click(ContentDialog sender, ContentDialogButtonClickEventArgs e)
+        {
+            DataTransferManager dataTransferManager = DataTransferManager.GetForCurrentView();
+            dataTransferManager.DataRequested += new TypedEventHandler<DataTransferManager,
+                DataRequestedEventArgs>(this.ShareTextHandler);
+            ShareImageButton_Click();
+        }
+        private void ShareTextHandler(DataTransferManager sender, DataRequestedEventArgs e)
+        {
+            if (this.imageFile != null)
+            {
+                DataRequest requestData = e.Request;
+                requestData.Data.Properties.Title = ShareNameBox.Text;
+                requestData.Data.Properties.Description = DescriptionBox.Text;
+                List<IStorageItem> imageItems = new List<IStorageItem>();
+                imageItems.Add(this.imageFile);
+                requestData.Data.SetStorageItems(imageItems);
+                RandomAccessStreamReference imageStreamRef = RandomAccessStreamReference.CreateFromFile(this.imageFile);
+                requestData.Data.Properties.Thumbnail = imageStreamRef;
+                requestData.Data.SetBitmap(imageStreamRef);
+            }
+        }
+        private async void ShareImageButton_Click()
+        {
+            try { 
+            var appFolder = await Windows.Storage.KnownFolders.PicturesLibrary.CreateFolderAsync("Shared");
+            StorageApplicationPermissions.FutureAccessList.Add(appFolder);
+            Windows.Storage.StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(appFolder.Path.ToString());
+            Windows.Storage.StorageFile file = await folder.CreateFileAsync(ShareNameBox.Text + ".gif", Windows.Storage.CreationCollisionOption.ReplaceExisting);
+            Windows.Storage.CachedFileManager.DeferUpdates(file);
+            IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite);
+            using (IOutputStream outputStream = stream.GetOutputStreamAt(0))
+            {
+                await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(outputStream);
+                await outputStream.FlushAsync();
+            }
+            stream.Dispose();
+
+            Windows.Storage.Provider.FileUpdateStatus status = await Windows.Storage.CachedFileManager.CompleteUpdatesAsync(file);
+            imageFile = await folder.GetFileAsync(ShareNameBox.Text + ".gif");
+            ShowUIButton_Click();
+        }
+            catch
+            {
+                var Folder = await Windows.Storage.KnownFolders.PicturesLibrary.GetFolderAsync("Shared");
+                await Folder.DeleteAsync();
+                var appFolder = await Windows.Storage.KnownFolders.PicturesLibrary.CreateFolderAsync("Shared");
+                StorageApplicationPermissions.FutureAccessList.Add(appFolder);
+                Windows.Storage.StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(appFolder.Path.ToString());
+                Windows.Storage.StorageFile file = await folder.CreateFileAsync(ShareNameBox.Text + ".gif", Windows.Storage.CreationCollisionOption.ReplaceExisting);
+                Windows.Storage.CachedFileManager.DeferUpdates(file);
+                IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite);
+                using (IOutputStream outputStream = stream.GetOutputStreamAt(0))
+                {
+                    await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(outputStream);
+                    await outputStream.FlushAsync();
+                }
+                stream.Dispose();
+
+                Windows.Storage.Provider.FileUpdateStatus status = await Windows.Storage.CachedFileManager.CompleteUpdatesAsync(file);
+                imageFile = await folder.GetFileAsync(ShareNameBox.Text + ".gif");
+                ShowUIButton_Click();
+            }
+        }
+        private void ShowUIButton_Click()
+        {
+            DataTransferManager.ShowShareUI();
+        }
+        public async void ShowShareDialog(object sender, RoutedEventArgs e)
+        {
+            IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+            if (currentStrokes.Count == 0)
+            {
+                return;
+            }
+            else
+            {
+                await ShareFileDialogPrompt.ShowAsync();
+            }
+
+
+        }
+       
+
         private void AdaptiveGridViewControl_ItemClick(object sender, Windows.UI.Xaml.Controls.ItemClickEventArgs e)
 
         {

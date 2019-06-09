@@ -44,6 +44,8 @@
                 </Pivot.LeftHeader>
                 <PivotItem TabIndex="0" Header="File">
                     <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" x:Name="FileBar" IsOpen="False" DefaultLabelPosition="Right" FlowDirection="RightToLeft" OverflowButtonVisibility="Collapsed">
+                        <AppBarButton ToolTipService.ToolTip="Share" Label="Share ink file" Icon="Share" Click="ShowShareDialog" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                        <AppBarSeparator/>
                         <AppBarButton ToolTipService.ToolTip="Export as image" Label="Export as image" Icon="Import" Click="SaveFileAsImage" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                         <AppBarSeparator/>
                         <AppBarButton ToolTipService.ToolTip="Open ink file" x:Uid="Ink_LoadInkFileButton" Icon="OpenFile" Click="LoadInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
@@ -248,6 +250,14 @@
         DefaultButton="Primary">
         </ContentDialog>
         <ContentDialog
+            x:Name="SaveInkConfirmDialog"
+        Title="You have unsaved work"
+        PrimaryButtonText="Save"
+        SecondaryButtonText="Continue editing"
+        CloseButtonText="Don't save"
+        DefaultButton="Primary">
+        </ContentDialog>
+        <ContentDialog
             x:Name="SaveFileDialogFailed"
         Title="The file could not be saved"
         CloseButtonText="Ok"
@@ -266,6 +276,20 @@
             <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                 <TextBox x:Name="FileNameBox" Header="Enter file name:" PlaceholderText="Enter name" />
                 <TextBlock Text="*Files are saved in the inkdrawings folder in the pictures library."/>
+            </StackPanel>
+
+        </ContentDialog>
+        <ContentDialog
+            x:Name="ShareFileDialogPrompt"
+        Title="Save file"
+        PrimaryButtonText="Open share panel"
+            PrimaryButtonClick="SelectImageButton_Click"
+        CloseButtonText="Cancel"
+        DefaultButton="Primary">
+
+            <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <TextBox x:Name="ShareNameBox" Header="Enter Title:" Text="Drawing" />
+                <TextBox x:Name="DescriptionBox" Header="Enter Description:" Text="A drawing i created with Flowpad!"/>
             </StackPanel>
 
         </ContentDialog>

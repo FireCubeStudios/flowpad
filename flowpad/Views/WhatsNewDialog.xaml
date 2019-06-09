@@ -21,13 +21,11 @@
             <!-- x:Uid="WhatsNew_Body"-->
             <TextBlock
                IsTextSelectionEnabled="True"
-                TextWrapping="WrapWholeWords">New Features and changes for update 3.2.3:
+                TextWrapping="WrapWholeWords">New Features and changes for update 3.3.4:
                 <LineBreak/>
-                -Drawings can now be exported as an image (save as an image)
+                -Drawings can now be shared to contacts, nearby devices, mail, messenger, onedrive and any other ap that supports the share panel
                 <LineBreak/>
-                -Export as .jpg, .jpeg, .png, .bmp, .gif, .jpegxr and .tiff
-                <LineBreak/>
-                -Fixed an issue where opening .gif(non isf) images from inkdrawings folder would crash the app
+                -If you have unsaved work the app will prompt you about it
                 <LineBreak/>
                 -Minor app design changes
                  <LineBreak/>
