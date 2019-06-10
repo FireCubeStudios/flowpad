@@ -52,7 +52,11 @@ namespace flowpad.UserControls
         private bool saveInkFileButtonIsEnabled;
         private bool clearAllButtonIsEnabled;*/
         private InkStrokesService strokeService;
+        private InkCopyPasteService copyPasteService;
         private InkLassoSelectionService lassoSelectionService;
+        private bool cutButtonIsEnabled;
+        private bool copyButtonIsEnabled;
+        private bool pasteButtonIsEnabled;
         private InkNodeSelectionService nodeSelectionService;
         private InkPointerDeviceService pointerDeviceService;
         private InkUndoRedoService undoRedoService;
@@ -82,6 +86,7 @@ namespace flowpad.UserControls
                 var selectionRectangleService = new InkSelectionRectangleService(inkCanvas, selectionCanvas, strokeService);
 
                 lassoSelectionService = new InkLassoSelectionService(inkCanvas, selectionCanvas, strokeService, selectionRectangleService);
+                copyPasteService = new InkCopyPasteService(strokeService);
                 nodeSelectionService = new InkNodeSelectionService(inkCanvas, selectionCanvas, analyzer, strokeService, selectionRectangleService);
                 pointerDeviceService = new InkPointerDeviceService(inkCanvas);
                 undoRedoService = new InkUndoRedoService(inkCanvas, strokeService);
@@ -89,6 +94,14 @@ namespace flowpad.UserControls
                 fileService = new InkFileService(inkCanvas, strokeService);
                 zoomService = new InkZoomService(canvasScroll);
 
+                inkCanvas.InkPresenter.StrokeInput.StrokeStarted += FileSaveCheck_Click;
+
+                MouseInkingButton.IsChecked = true;
+                TouchInkingButton.IsChecked = true;
+                InkSurfacePen.IsChecked = true;
+                strokeService.CopyStrokesEvent += (s, e) => RefreshEnabledButtons();
+                strokeService.SelectStrokesEvent += (s, e) => RefreshEnabledButtons();
+                strokeService.ClearStrokesEvent += (s, e) => RefreshEnabledButtons();
                 strokeService.ClearStrokesEvent += (s, e) => RefreshEnabledButtons();
                 undoRedoService.UndoEvent += (s, e) => RefreshEnabledButtons();
                 undoRedoService.RedoEvent += (s, e) => RefreshEnabledButtons();
@@ -96,6 +109,7 @@ namespace flowpad.UserControls
                 //pointerDeviceService.DetectPenEvent += (s, e) => TouchInkingButtonIsChecked = false;
 
             };
+          
             if (ImageGridView != null)
 
             {
@@ -172,15 +186,7 @@ namespace flowpad.UserControls
        };
         }
 
-        public bool LassoSelectionButtonIsChecked
-        {
-            get => lassoSelectionButtonIsChecked;
-            set
-            {
-                Set(ref lassoSelectionButtonIsChecked, value);
-                //ConfigLassoSelection(value);
-            }
-        }
+       
 
         public bool TransformTextAndShapesButtonIsEnabled
         {
@@ -207,7 +213,56 @@ namespace flowpad.UserControls
             set { Set(ref _versionDescription, value); }
         }
 
+        public bool CutButtonIsEnabled
+        {
+            get => cutButtonIsEnabled;
+            set => Set(ref cutButtonIsEnabled, value);
+        }
 
+        public bool CopyButtonIsEnabled
+        {
+            get => copyButtonIsEnabled;
+            set => Set(ref copyButtonIsEnabled, value);
+        }
+
+        public bool PasteButtonIsEnabled
+        {
+            get => pasteButtonIsEnabled;
+            set => Set(ref pasteButtonIsEnabled, value);
+        }
+        private void Copy_Click(object sender, RoutedEventArgs e) => copyPasteService?.Copy();
+
+        private void Cut_Click(object sender, RoutedEventArgs e)
+        {
+            copyPasteService?.Cut();
+            ClearSelection();
+        }
+
+        private void Paste_Click(object sender, RoutedEventArgs e)
+        {
+            copyPasteService?.Paste();
+            ClearSelection();
+        }
+        private void ConfigLassoSelection(bool enableLasso)
+        {
+            if (enableLasso)
+            {
+                lassoSelectionService?.StartLassoSelectionConfig();
+            }
+            else
+            {
+                lassoSelectionService?.EndLassoSelectionConfig();
+            }
+        }
+        public bool LassoSelectionButtonIsChecked
+        {
+            get => lassoSelectionButtonIsChecked;
+            set
+            {
+                Set(ref lassoSelectionButtonIsChecked, value);
+                ConfigLassoSelection(value);
+            }
+        }
 
         private void ZoomIn_Click(object sender, RoutedEventArgs e) => zoomService?.ZoomIn();
 
@@ -842,6 +897,7 @@ namespace flowpad.UserControls
 
                 }
                 // save results
+                FileSaved = true;
             }
 
         }
@@ -948,6 +1004,14 @@ namespace flowpad.UserControls
                 FileOpen = V.ImagePath;
             }
 
+        }
+        private void FileSaveCheck_Click(InkStrokeInput sender, PointerEventArgs args)
+        {
+            if(FileSaved == true)
+            {
+                FileSaved = false;
+            }
+            return;
         }
         public class Images
         {

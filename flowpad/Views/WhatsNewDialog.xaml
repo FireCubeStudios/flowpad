@@ -21,11 +21,21 @@
             <!-- x:Uid="WhatsNew_Body"-->
             <TextBlock
                IsTextSelectionEnabled="True"
-                TextWrapping="WrapWholeWords">New Features and changes for update 3.3.4:
+                TextWrapping="WrapWholeWords">New Features and changes for update 3.4.5:
                 <LineBreak/>
-                -Drawings can now be shared to contacts, nearby devices, mail, messenger, onedrive and any other ap that supports the share panel
+                -Selection tool is back now improved and bug free
                 <LineBreak/>
-                -If you have unsaved work the app will prompt you about it
+                -Cut, Copy and Paste ink
+                <LineBreak/>
+                -Select ink to reposition it
+                <LineBreak/>
+                -Use gestures or the button to select ink
+                <LineBreak/>
+                -Added acrylic to dialogs
+                <LineBreak/>
+                -Fixed an issue where the unsaved file dialog will not show up when ink is exported
+                <LineBreak/>
+                -Fixed an issue where the unsaved file dialog would not wwork after ink was saved once despite starting a new drawing
                 <LineBreak/>
                 -Minor app design changes
                  <LineBreak/>

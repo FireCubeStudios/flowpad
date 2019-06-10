@@ -46,7 +46,7 @@
                     <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" x:Name="FileBar" IsOpen="False" DefaultLabelPosition="Right" FlowDirection="RightToLeft" OverflowButtonVisibility="Collapsed">
                         <AppBarButton ToolTipService.ToolTip="Share" Label="Share ink file" Icon="Share" Click="ShowShareDialog" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                         <AppBarSeparator/>
-                        <AppBarButton ToolTipService.ToolTip="Export as image" Label="Export as image" Icon="Import" Click="SaveFileAsImage" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                        <AppBarButton ToolTipService.ToolTip="Export as image" Label="Export as image" Icon="Download" Click="SaveFileAsImage" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                         <AppBarSeparator/>
                         <AppBarButton ToolTipService.ToolTip="Open ink file" x:Uid="Ink_LoadInkFileButton" Icon="OpenFile" Click="LoadInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                         <AppBarButton ToolTipService.ToolTip="Save ink file via file explorer"  Label="Save ink file via file explorer" Icon="SaveLocal" Click="SaveInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
@@ -87,11 +87,17 @@
                                             </Flyout>
                                         </FlyoutBase.AttachedFlyout>
                                     </InkToolbarCustomToggleButton>
+                                    <InkToolbarCustomToolButton x:Uid="InkDraw_LassoSelectionButton" Background="Transparent" IsChecked="{x:Bind LassoSelectionButtonIsChecked, Mode=TwoWay}">
+                                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xEF20;" />
+                                    </InkToolbarCustomToolButton>
                                 </InkToolbar>
                                 <CommandBar  RelativePanel.RightOf="toolbar" Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" x:Name="SideBar" IsOpen="False" DefaultLabelPosition="Right" OverflowButtonVisibility="Collapsed">
                                     <AppBarButton ToolTipService.ToolTip="Undo" x:Uid="InkSmartCanvas_UndoButton" Icon="Undo" Click="Undo_Click"  BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                                     <AppBarButton ToolTipService.ToolTip="Redo" x:Uid="InkSmartCanvas_RedoButton" Icon="Redo" Click="Redo_Click"  BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                                     <AppBarSeparator/>
+                                    <AppBarButton x:Uid="InkDraw_CutButton" Icon="Cut" Click="Cut_Click"   BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                    <AppBarButton x:Uid="InkDraw_CopyButton" Icon="Copy" Click="Copy_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                    <AppBarButton x:Uid="InkDraw_PasteButton" Icon="Paste" Click="Paste_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                                     <AppBarButton ToolTipService.ToolTip="Clear all" x:Uid="InkSmartCanvasView_ClearAllButton" Icon="Delete" Click="ClearAll_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                                 </CommandBar>
                             </RelativePanel>
@@ -243,6 +249,7 @@
         </Grid>
         <ContentDialog
             x:Name="SaveFileDialogSaved"
+             Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
         Title="File saved"
         PrimaryButtonText="Open folder"
             PrimaryButtonClick="Openlocation_ClickAsync"
@@ -251,6 +258,7 @@
         </ContentDialog>
         <ContentDialog
             x:Name="SaveInkConfirmDialog"
+             Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
         Title="You have unsaved work"
         PrimaryButtonText="Save"
         SecondaryButtonText="Continue editing"
@@ -259,12 +267,14 @@
         </ContentDialog>
         <ContentDialog
             x:Name="SaveFileDialogFailed"
+             Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
         Title="The file could not be saved"
         CloseButtonText="Ok"
         DefaultButton="Primary">
         </ContentDialog>
         <ContentDialog
             x:Name="SaveFileDialogPrompt"
+             Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
         Title="Save file"
         PrimaryButtonText="Save"
             PrimaryButtonClick="SaveFileDialogPrompt_PrimaryButtonClick"
@@ -280,6 +290,7 @@
 
         </ContentDialog>
         <ContentDialog
+             Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
             x:Name="ShareFileDialogPrompt"
         Title="Save file"
         PrimaryButtonText="Open share panel"
@@ -299,7 +310,7 @@
               CloseButtonText="Cancel"
              PrimaryButtonText="Open"
             IsPrimaryButtonEnabled="False"
-           
+            Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
             PrimaryButtonClick="OpenFileDialogPrompt_PrimaryButtonClick"
             SecondaryButtonClick="OpenFileDialogPrompt_SecondaryButtonClick"
             

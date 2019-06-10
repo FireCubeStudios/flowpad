@@ -149,6 +149,7 @@
     <Compile Include="Activation\DefaultLaunchActivationHandler.cs" />
     <Compile Include="Services\FirstRunDisplayService.cs" />
     <Compile Include="Services\Ink\InkAsyncAnalyzer.cs" />
+    <Compile Include="Services\Ink\InkCopyPasteService.cs" />
     <Compile Include="Services\Ink\InkFileService.cs" />
     <Compile Include="Services\Ink\InkLassoSelectionService.cs" />
     <Compile Include="Services\Ink\InkNodeSelectionService.cs" />
