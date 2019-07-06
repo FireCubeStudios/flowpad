@@ -35,7 +35,10 @@ using Windows.ApplicationModel.DataTransfer;
 using Windows.UI.Xaml.Navigation;
 using Windows.Foundation;
 using Windows.Storage.Pickers;
-
+using Windows.UI;
+using Microsoft.Toolkit.Uwp.Helpers;
+using Windows.Graphics.Printing;
+using MUXC = Microsoft.UI.Xaml.Controls;
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace flowpad.UserControls
@@ -67,6 +70,7 @@ namespace flowpad.UserControls
         private StorageFile imageFile;
         public Boolean FileSaved = false;
         private ElementTheme _elementTheme = ThemeSelectorService.Theme;
+        public PrintHelper printHelper;
 
         public InkCanvasUserControl()
         {
@@ -109,7 +113,7 @@ namespace flowpad.UserControls
                 //pointerDeviceService.DetectPenEvent += (s, e) => TouchInkingButtonIsChecked = false;
 
             };
-          
+
             if (ImageGridView != null)
 
             {
@@ -123,70 +127,95 @@ namespace flowpad.UserControls
             }
 
 
-      Windows.UI.Core.Preview.SystemNavigationManagerPreview.GetForCurrentView().CloseRequested +=
-       async (sender, args) =>
-       {
-           try
-           {
-               args.Handled = true;
-               var Folder = await Windows.Storage.KnownFolders.PicturesLibrary.GetFolderAsync("Shared");
-               await Folder.DeleteAsync();
-               IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-               if (currentStrokes.Count == 0 || FileSaved == true)
-               {
-                   App.Current.Exit();
-               }
-               else
-               {
+            Windows.UI.Core.Preview.SystemNavigationManagerPreview.GetForCurrentView().CloseRequested +=
+             async (sender, args) =>
+             {
+                 try
+                 {
+                     args.Handled = true;
+                     var Folder = await Windows.Storage.KnownFolders.PicturesLibrary.GetFolderAsync("Shared");
+                     await Folder.DeleteAsync();
+                     try
+                     {
+
+                         IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
 
 
-                   var result = await SaveInkConfirmDialog.ShowAsync();
-                   if (result == ContentDialogResult.Primary)
-                   {
-                       await SaveFileDialogPrompt.ShowAsync();
-                   }
-                   else if (result == ContentDialogResult.Secondary)
-                   {
-                       SaveFileDialogPrompt.Hide();
-                   }
-                   else
-                   {
-                       App.Current.Exit();
-                   }
-               }
-           }
-           catch
-           {
-               args.Handled = true;
-               IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-               if (currentStrokes.Count == 0 || FileSaved == true)
-               {
-                   App.Current.Exit();
-               }
-               else
-               {
+
+                         if (currentStrokes.Count == 0 || FileSaved == true)
+                         {
+                             App.Current.Exit();
+                         }
+                         else
+                         {
 
 
-                   var result = await SaveInkConfirmDialog.ShowAsync();
-                   if (result == ContentDialogResult.Primary)
-                   {
-                       await SaveFileDialogPrompt.ShowAsync();
-                   }
-                   else if (result == ContentDialogResult.Secondary)
-                   {
-                       SaveFileDialogPrompt.Hide();
-                   }
-                   else
-                   {
-                       App.Current.Exit();
-                   }
-               }
+                             var result = await SaveInkConfirmDialog.ShowAsync();
+                             if (result == ContentDialogResult.Primary)
+                             {
+                                 await SaveFileDialogPrompt.ShowAsync();
+                             }
+                             else if (result == ContentDialogResult.Secondary)
+                             {
+                                 SaveFileDialogPrompt.Hide();
+                             }
+                             else
+                             {
+                                 App.Current.Exit();
+                             }
 
-           }
-       };
+                         }
+                     }
+                     catch
+                     {
+                         App.Current.Exit();
+
+                     }
+                 }
+                 catch
+                 {
+                     try
+                     {
+
+                         IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+
+
+
+                         if (currentStrokes.Count == 0 || FileSaved == true)
+                         {
+                             App.Current.Exit();
+                         }
+                         else
+                         {
+
+
+                             var result = await SaveInkConfirmDialog.ShowAsync();
+                             if (result == ContentDialogResult.Primary)
+                             {
+                                 await SaveFileDialogPrompt.ShowAsync();
+                             }
+                             else if (result == ContentDialogResult.Secondary)
+                             {
+                                 SaveFileDialogPrompt.Hide();
+                             }
+                             else
+                             {
+                                 App.Current.Exit();
+                             }
+
+                         }
+                     }
+                     catch
+                     {
+                         App.Current.Exit();
+
+                     }
+                 }
+             };
+
         }
 
-       
+
 
         public bool TransformTextAndShapesButtonIsEnabled
         {
@@ -729,7 +758,7 @@ namespace flowpad.UserControls
             }
 
         }
-       
+
 
         private async void SaveFileDialogPrompt_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
@@ -738,7 +767,7 @@ namespace flowpad.UserControls
             FileSaved = true;
         }
 
-      
+
 
 
         private async void Openlocation_ClickAsync(ContentDialog sender, ContentDialogButtonClickEventArgs e)
@@ -818,6 +847,7 @@ namespace flowpad.UserControls
                 using (var inputStream = stream.GetInputStreamAt(0))
                 {
                     await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                    FileSaved = true;
                 }
             }
             catch
@@ -931,24 +961,25 @@ namespace flowpad.UserControls
         }
         private async void ShareImageButton_Click()
         {
-            try { 
-            var appFolder = await Windows.Storage.KnownFolders.PicturesLibrary.CreateFolderAsync("Shared");
-            StorageApplicationPermissions.FutureAccessList.Add(appFolder);
-            Windows.Storage.StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(appFolder.Path.ToString());
-            Windows.Storage.StorageFile file = await folder.CreateFileAsync(ShareNameBox.Text + ".gif", Windows.Storage.CreationCollisionOption.ReplaceExisting);
-            Windows.Storage.CachedFileManager.DeferUpdates(file);
-            IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite);
-            using (IOutputStream outputStream = stream.GetOutputStreamAt(0))
+            try
             {
-                await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(outputStream);
-                await outputStream.FlushAsync();
-            }
-            stream.Dispose();
+                var appFolder = await Windows.Storage.KnownFolders.PicturesLibrary.CreateFolderAsync("Shared");
+                StorageApplicationPermissions.FutureAccessList.Add(appFolder);
+                Windows.Storage.StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(appFolder.Path.ToString());
+                Windows.Storage.StorageFile file = await folder.CreateFileAsync(ShareNameBox.Text + ".gif", Windows.Storage.CreationCollisionOption.ReplaceExisting);
+                Windows.Storage.CachedFileManager.DeferUpdates(file);
+                IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite);
+                using (IOutputStream outputStream = stream.GetOutputStreamAt(0))
+                {
+                    await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(outputStream);
+                    await outputStream.FlushAsync();
+                }
+                stream.Dispose();
 
-            Windows.Storage.Provider.FileUpdateStatus status = await Windows.Storage.CachedFileManager.CompleteUpdatesAsync(file);
-            imageFile = await folder.GetFileAsync(ShareNameBox.Text + ".gif");
-            ShowUIButton_Click();
-        }
+                Windows.Storage.Provider.FileUpdateStatus status = await Windows.Storage.CachedFileManager.CompleteUpdatesAsync(file);
+                imageFile = await folder.GetFileAsync(ShareNameBox.Text + ".gif");
+                ShowUIButton_Click();
+            }
             catch
             {
                 var Folder = await Windows.Storage.KnownFolders.PicturesLibrary.GetFolderAsync("Shared");
@@ -989,36 +1020,116 @@ namespace flowpad.UserControls
 
 
         }
-       
+
 
         private void AdaptiveGridViewControl_ItemClick(object sender, Windows.UI.Xaml.Controls.ItemClickEventArgs e)
 
         {
 
-            if (e.ClickedItem != null)
+            if (e.ClickedItem != null) { 
 
-            {
+
                 OpenFileDialogPrompt.IsPrimaryButtonEnabled = true;
-                OpenFileDialogPrompt.IsSecondaryButtonEnabled = true;
-               var V = e.ClickedItem as Images;
-                FileOpen = V.ImagePath;
-            }
+            OpenFileDialogPrompt.IsSecondaryButtonEnabled = true;
+            var V = e.ClickedItem as Images;
+            FileOpen = V.ImagePath;
+        }
 
-        }
-        private void FileSaveCheck_Click(InkStrokeInput sender, PointerEventArgs args)
+    }
+    private void FileSaveCheck_Click(InkStrokeInput sender, PointerEventArgs args)
+    {
+        if (FileSaved == true)
         {
-            if(FileSaved == true)
-            {
-                FileSaved = false;
-            }
-            return;
+            FileSaved = false;
         }
-        public class Images
-        {
-            public ImageSource ImageURL { get; set; }
-            public string ImageText { get; set; }
-            public string ImagePath { get; internal set; }
-        }
+        return;
+    }
+    public class Images
+    {
+        public ImageSource ImageURL { get; set; }
+        public string ImageText { get; set; }
+        public string ImagePath { get; internal set; }
+    }
+    private async void Printer_Click(object sender, RoutedEventArgs e)
+    {
+   
+                IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+                if (currentStrokes.Count == 0)
+                {
+                    return;
+                }
+                // Create a new PrintHelperOptions instance
+                var defaultPrintHelperOptions = new PrintHelperOptions();
+
+                // Configure options that you want to be displayed on the print dialog
+                defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Orientation);
+                defaultPrintHelperOptions.Orientation = PrintOrientation.Landscape;
+
+                defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Copies);
+                defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Orientation);
+                defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.MediaSize);
+                defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Collation);
+                defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Duplex);
+                // Create a new PrintHelper instance
+                // "container" is a XAML panel that will be used to host printable control. 
+                // It needs to be in your visual tree but can be hidden with Opacity = 0
+                var inkStream = new InMemoryRandomAccessStream();
+                await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(inkStream.GetOutputStreamAt(0));
+                var inkBitmap = new BitmapImage();
+                await inkBitmap.SetSourceAsync(inkStream);
+
+                // You need to adjust Margin to layout the image properly in the print-page. 
+                var inkBounds = inkCanvas.InkPresenter.StrokeContainer.BoundingRect;
+                var inkMargin = new Thickness(inkBounds.Left, inkBounds.Top, inkCanvas.ActualWidth - inkBounds.Right, inkCanvas.ActualHeight - inkBounds.Bottom);
+
+                // Prepare Viewbox+Image to be printed.
+                var inkViewbox = new Viewbox()
+                {
+                    Child = new Image()
+                    {
+                        Source = inkBitmap,
+                        Margin = inkMargin
+                    },
+                    Width = inkCanvas.ActualWidth,
+                    Height = inkCanvas.ActualHeight
+                };
+
+                printHelper = new PrintHelper(PanelC, defaultPrintHelperOptions);
+                printHelper.AddFrameworkElementToPrint(inkViewbox);
+
+                printHelper.OnPrintFailed += PrintHelper_OnPrintFailed;
+                printHelper.OnPrintSucceeded += PrintHelper_OnPrintSucceeded;
+
+                // Start printing process
+                await printHelper.ShowPrintUIAsync("Flowpad");
+
+                // Event handlers
+                printHelper.Dispose();
+
+    }
+    private async void PrintHelper_OnPrintSucceeded()
+    {
+        printHelper.Dispose();
+        var dialog = new MessageDialog("Printing successful.");
+        await dialog.ShowAsync();
+    }
+
+    private async void PrintHelper_OnPrintFailed()
+    {
+        printHelper.Dispose();
+        var dialog = new MessageDialog("Printing failed.");
+        await dialog.ShowAsync();
+    }
+       
+        private void InkCanvas_ContextRequested(UIElement sender, Windows.UI.Xaml.Input.ContextRequestedEventArgs args)
+    {
+        FlyoutShowOptions Option = new FlyoutShowOptions();
+        Option.ShowMode = FlyoutShowMode.Transient;
+
+        CommandBarFlyoutCommands.ShowAt(inkCanvas, Option);
     }
 }
+    }
+
+
 

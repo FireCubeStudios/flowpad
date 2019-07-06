@@ -9,6 +9,7 @@
     xmlns:usercontrols1="using:flowpad.UserControls"
     xmlns:helper="using:flowpad.Helpers"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:muxcontrols="using:Microsoft.UI.Xaml.Controls"
      xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
     mc:Ignorable="d"
     d:DesignHeight="300"
@@ -25,12 +26,42 @@
                            Stretch="UniformToFill"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center">
+                  
                 </Image>
-                <TextBlock FontWeight="Thin" Text="{Binding ImageText}"
-                           FontSize="20">
-                </TextBlock>
+                <Grid Background="Black" Height="30" VerticalAlignment="Top">
+                    <TextBlock FontWeight="Thin" Text="{Binding ImageText}"
+                           FontSize="20" Foreground="White" >
+                    </TextBlock>
+                </Grid>
             </Grid>
         </DataTemplate>
+        <muxcontrols:CommandBarFlyout Placement="Right" x:Name="CommandBarFlyoutCommands">
+            <AppBarButton ToolTipService.ToolTip="Undo" x:Uid="InkSmartCanvas_UndoButton" Icon="Undo" Click="Undo_Click"  BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            <AppBarButton ToolTipService.ToolTip="Redo" x:Uid="InkSmartCanvas_RedoButton" Icon="Redo" Click="Redo_Click"  BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            <AppBarSeparator/>
+            <AppBarButton x:Uid="InkDraw_CutButton" Icon="Cut" Click="Cut_Click"   BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            <AppBarButton x:Uid="InkDraw_CopyButton" Icon="Copy" Click="Copy_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            <AppBarButton x:Uid="InkDraw_PasteButton" Icon="Paste" Click="Paste_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            <AppBarButton ToolTipService.ToolTip="Clear all" x:Uid="InkSmartCanvasView_ClearAllButton" Icon="Delete" Click="ClearAll_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            <AppBarSeparator/>
+            <AppBarButton ToolTipService.ToolTip="Zoom in" Icon="ZoomIn" Label="Zoom in" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="ZoomIn_Click"></AppBarButton>
+            <AppBarButton ToolTipService.ToolTip="Zoom out" Icon="ZoomOut" Label="Zoom out" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="ZoomOut_Click"></AppBarButton>
+            <AppBarButton ToolTipService.ToolTip="Original size" Icon="FullScreen" Label="Original size" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="ResetZoom_Click"></AppBarButton>
+            <AppBarButton ToolTipService.ToolTip="Fit to screen" Label="Fit to screen" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="FitToScreen_Click"></AppBarButton>
+            <muxcontrols:CommandBarFlyout.SecondaryCommands>
+                <AppBarButton ToolTipService.ToolTip="Open files" Label="Open ink file" Icon="OpenFile" Click="FilesDialog_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                <AppBarSeparator/>
+                <AppBarButton ToolTipService.ToolTip="Save ink file" Label="Save ink file" Icon="Save" Click="SaveInkFileInApp_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                <AppBarButton ToolTipService.ToolTip="Save ink file via file explorer"  Label="Save ink file via file explorer" Icon="SaveLocal" Click="SaveInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                <AppBarButton ToolTipService.ToolTip="Open ink file via file explorer" x:Uid="Ink_LoadInkFileButton" Icon="OpenLocal" Click="LoadInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                <AppBarSeparator/>
+                <AppBarButton ToolTipService.ToolTip="Export as image" Label="Export as image" Icon="Download" Click="SaveFileAsImage" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                <AppBarSeparator/>
+                <AppBarButton ToolTipService.ToolTip="Print" Label="Print ink" Icon="Print" Click="Printer_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                <AppBarButton ToolTipService.ToolTip="Share" Label="Share ink file" Icon="Share" Click="ShowShareDialog" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            </muxcontrols:CommandBarFlyout.SecondaryCommands>
+        </muxcontrols:CommandBarFlyout>
+
     </UserControl.Resources>
     <Grid>
         <Grid x:Name="TitleGrid" Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"></Grid>
@@ -44,18 +75,21 @@
                 </Pivot.LeftHeader>
                 <PivotItem TabIndex="0" Header="File">
                     <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" x:Name="FileBar" IsOpen="False" DefaultLabelPosition="Right" FlowDirection="RightToLeft" OverflowButtonVisibility="Collapsed">
+                        <AppBarButton ToolTipService.ToolTip="Print" Label="Print ink" Icon="Print" Click="Printer_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                         <AppBarButton ToolTipService.ToolTip="Share" Label="Share ink file" Icon="Share" Click="ShowShareDialog" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                         <AppBarSeparator/>
                         <AppBarButton ToolTipService.ToolTip="Export as image" Label="Export as image" Icon="Download" Click="SaveFileAsImage" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                         <AppBarSeparator/>
-                        <AppBarButton ToolTipService.ToolTip="Open ink file" x:Uid="Ink_LoadInkFileButton" Icon="OpenFile" Click="LoadInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                        <AppBarButton ToolTipService.ToolTip="Open ink file via file explorer" x:Uid="Ink_LoadInkFileButton" Icon="OpenLocal" Click="LoadInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                         <AppBarButton ToolTipService.ToolTip="Save ink file via file explorer"  Label="Save ink file via file explorer" Icon="SaveLocal" Click="SaveInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                         <!--x:Uid="Ink_SaveInkFileButton"-->
                         <AppBarButton ToolTipService.ToolTip="Save ink file" Label="Save ink file" Icon="Save" Click="SaveInkFileInApp_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                        <AppBarSeparator/>
+                        <AppBarButton ToolTipService.ToolTip="Open files" Label="Open ink file" Icon="OpenFile" Click="FilesDialog_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                     </CommandBar>
                 </PivotItem>
                 <PivotItem Header="Draw" TabIndex="1">
-                    <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" IsOpen="False" DefaultLabelPosition="Right" x:Name="InkBar">
+                    <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" IsOpen="False" DefaultLabelPosition="Right" x:Name="InkBar" OverflowButtonVisibility="Collapsed">
                         <CommandBar.Content>
                             <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
@@ -106,6 +140,8 @@
                 </PivotItem>
                 <PivotItem Header="Canvas" TabIndex="2">
                     <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" x:Name="CanvasBar" IsOpen="False" DefaultLabelPosition="Right">
+                    
+          
                         <AppBarButton ToolTipService.ToolTip="Zoom in" Icon="ZoomIn" Label="Zoom in" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="ZoomIn_Click"></AppBarButton>
                         <AppBarButton ToolTipService.ToolTip="Zoom out" Icon="ZoomOut" Label="Zoom out" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="ZoomOut_Click"></AppBarButton>
                         <AppBarButton ToolTipService.ToolTip="Original size" Icon="FullScreen" Label="Original size" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="ResetZoom_Click"></AppBarButton>
@@ -222,7 +258,8 @@
                 </usercontrols1:BarFlyout.PanelContent>
 
             </usercontrols1:BarFlyout>
-            <ScrollViewer
+
+                <ScrollViewer
             x:Name="canvasScroll"
             x:Load="False"
             Canvas.ZIndex="200"
@@ -231,21 +268,24 @@
             ScrollViewer.HorizontalScrollBarVisibility="Auto"
             ZoomMode="Enabled"
              Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}">
-                <Grid Background="{StaticResource InkCanvasBackground}"
+                    <Grid Background="{StaticResource InkCanvasBackground}"
                         Width="{Binding ElementName=inkCanvas, Path=Width}"
-                        Height="{Binding ElementName=inkCanvas, Path=Height}">
-                    <InkCanvas x:Name="inkCanvas"
+                        Height="{Binding ElementName=inkCanvas, Path=Height}"
+                                 >
+                        <InkCanvas x:Name="inkCanvas"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
+                          ContextRequested="InkCanvas_ContextRequested"
                                />
-                    <Canvas x:Name="drawingCanvas"
+                        <Canvas x:Name="drawingCanvas"
                             Width="{Binding ElementName=inkCanvas, Path=Width}"
                             Height="{Binding ElementName=inkCanvas, Path=Height}"/>
-                    <Canvas x:Name="selectionCanvas"
+                        <Canvas x:Name="selectionCanvas"
                             Width="{Binding ElementName=inkCanvas, Path=Width}"
                             Height="{Binding ElementName=inkCanvas, Path=Height}"/>
-                </Grid>
-            </ScrollViewer>
+                    </Grid>
+                </ScrollViewer>
+            <Grid x:Name="PanelC"></Grid>
         </Grid>
         <ContentDialog
             x:Name="SaveFileDialogSaved"

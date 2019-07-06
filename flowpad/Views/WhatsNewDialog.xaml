@@ -21,21 +21,21 @@
             <!-- x:Uid="WhatsNew_Body"-->
             <TextBlock
                IsTextSelectionEnabled="True"
-                TextWrapping="WrapWholeWords">New Features and changes for update 3.4.5:
+                TextWrapping="WrapWholeWords">New Features and changes for update 3.5.6:
                 <LineBreak/>
-                -Selection tool is back now improved and bug free
+                -Printing ink is now supported
                 <LineBreak/>
-                -Cut, Copy and Paste ink
+                -Printing supports sending to one note natively
                 <LineBreak/>
-                -Select ink to reposition it
+                -Minimum version of app now supports fall creators update (16299)
                 <LineBreak/>
-                -Use gestures or the button to select ink
+                -Added new commandbar flyout to access all the commands in one place
                 <LineBreak/>
-                -Added acrylic to dialogs
+                -Right click inkcanvas to access the command bar flyout
                 <LineBreak/>
-                -Fixed an issue where the unsaved file dialog will not show up when ink is exported
+                -Added button in File pivot to access open file hub easier
                 <LineBreak/>
-                -Fixed an issue where the unsaved file dialog would not wwork after ink was saved once despite starting a new drawing
+                -Fixed an issue where the app would crash when a dialog was open
                 <LineBreak/>
                 -Minor app design changes
                  <LineBreak/>
