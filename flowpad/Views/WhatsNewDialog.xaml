@@ -21,23 +21,19 @@
             <!-- x:Uid="WhatsNew_Body"-->
             <TextBlock
                IsTextSelectionEnabled="True"
-                TextWrapping="WrapWholeWords">New Features and changes for update 3.5.6:
+                TextWrapping="WrapWholeWords">New Features and changes for update 3.7.8:
                 <LineBreak/>
-                -Printing ink is now supported
+                -Flowpad GO for android has been released.
                 <LineBreak/>
-                -Printing supports sending to one note natively
+                -Designed for touch and light weight app thats only 1.02 mb compared to flowpad for desktop with 44.05 mb
                 <LineBreak/>
-                -Minimum version of app now supports fall creators update (16299)
-                <LineBreak/>
-                -Added new commandbar flyout to access all the commands in one place
-                <LineBreak/>
-                -Right click inkcanvas to access the command bar flyout
-                <LineBreak/>
-                -Added button in File pivot to access open file hub easier
-                <LineBreak/>
-                -Fixed an issue where the app would crash when a dialog was open
-                <LineBreak/>
-                -Minor app design changes
+                -Flowpad GO has exclusive features including:
+                 <LineBreak/>
+                -Annotating images
+                 <LineBreak/>
+                -adding shapes, lines and flood fill bucket
+                 <LineBreak/>
+                -Point eraser and onscreen color picker
                  <LineBreak/>
                 -Bug fixes and performance improvements
             </TextBlock>

@@ -57,7 +57,7 @@
                 <AppBarSeparator/>
                 <AppBarButton ToolTipService.ToolTip="Export as image" Label="Export as image" Icon="Download" Click="SaveFileAsImage" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                 <AppBarSeparator/>
-                <AppBarButton ToolTipService.ToolTip="Print" Label="Print ink" Icon="Print" Click="Printer_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                <!--<AppBarButton ToolTipService.ToolTip="Print" Label="Print ink" Icon="Print" Click="Printer_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />-->
                 <AppBarButton ToolTipService.ToolTip="Share" Label="Share ink file" Icon="Share" Click="ShowShareDialog" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
             </muxcontrols:CommandBarFlyout.SecondaryCommands>
         </muxcontrols:CommandBarFlyout>
@@ -75,7 +75,7 @@
                 </Pivot.LeftHeader>
                 <PivotItem TabIndex="0" Header="File">
                     <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" x:Name="FileBar" IsOpen="False" DefaultLabelPosition="Right" FlowDirection="RightToLeft" OverflowButtonVisibility="Collapsed">
-                        <AppBarButton ToolTipService.ToolTip="Print" Label="Print ink" Icon="Print" Click="Printer_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                        <!--<AppBarButton ToolTipService.ToolTip="Print" Label="Print ink" Icon="Print" Click="Printer_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />-->
                         <AppBarButton ToolTipService.ToolTip="Share" Label="Share ink file" Icon="Share" Click="ShowShareDialog" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                         <AppBarSeparator/>
                         <AppBarButton ToolTipService.ToolTip="Export as image" Label="Export as image" Icon="Download" Click="SaveFileAsImage" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
@@ -133,6 +133,7 @@
                                     <AppBarButton x:Uid="InkDraw_CopyButton" Icon="Copy" Click="Copy_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                                     <AppBarButton x:Uid="InkDraw_PasteButton" Icon="Paste" Click="Paste_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                                     <AppBarButton ToolTipService.ToolTip="Clear all" x:Uid="InkSmartCanvasView_ClearAllButton" Icon="Delete" Click="ClearAll_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                    <AppBarButton ToolTipService.ToolTip="Open ink settings" Icon="Setting" Click="InkSettingsButton_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
                                 </CommandBar>
                             </RelativePanel>
                         </CommandBar.Content>
@@ -216,7 +217,10 @@
                                 </StackPanel>
                             </PivotItem>
                             <PivotItem Header="What's new">
-                                <Button x:Name="Whatsnew" Click="Whatsnew_Click">What's new</Button>
+                                <StackPanel Orientation="Vertical">
+                                    <Button x:Name="FirstRun" Click="Welcome_Click" Margin="10" VerticalAlignment="Center">Welcome</Button>
+                                    <Button x:Name="Whatsnew" Click="Whatsnew_Click" Margin="10" VerticalAlignment="Center">What's new</Button>
+                                </StackPanel>
                             </PivotItem>
                             <PivotItem Header="About">
                                 <StackPanel>
@@ -285,17 +289,30 @@
                             Height="{Binding ElementName=inkCanvas, Path=Height}"/>
                     </Grid>
                 </ScrollViewer>
+            
+            <muxcontrols:TeachingTip x:Name="AutoSaveTip"
+    Title="Ink advanced settings">
+                <muxcontrols:TeachingTip.IconSource>
+                    <muxcontrols:SymbolIconSource Symbol="Setting"/>
+                </muxcontrols:TeachingTip.IconSource>
+                <StackPanel Orientation="Vertical">
+                    <ToggleSwitch Header="Tilt" OffContent="Tilt disabled" OnContent="Tilt enabled" IsOn="True" Toggled="TiltSwitch_Toggled"/>
+                    <ToggleSwitch Header="Pressure" OffContent="Pressure disabled" OnContent="Pressure enabled" IsOn="True" Toggled="PressureSwitch_Toggled"/>
+                   <!--<ComboBox Header="Pen tip shape" Width="200" SelectedItem="Circle" SelectionChanged="ComboBox_SelectionChanged">
+                        <x:String>Circle</x:String>
+                        <x:String>Rectangle</x:String>
+                    </ComboBox>-->
+                </StackPanel>
+            </muxcontrols:TeachingTip>
+            <muxcontrols:TeachingTip x:Name="SaveFileConfirmed"
+    Title="File Saved"
+    ActionButtonContent="Open folder"
+    ActionButtonClick="SaveFileConfirmed_ActionButtonClick">
+            </muxcontrols:TeachingTip>
+       
             <Grid x:Name="PanelC"></Grid>
         </Grid>
-        <ContentDialog
-            x:Name="SaveFileDialogSaved"
-             Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
-        Title="File saved"
-        PrimaryButtonText="Open folder"
-            PrimaryButtonClick="Openlocation_ClickAsync"
-        CloseButtonText="Ok"
-        DefaultButton="Primary">
-        </ContentDialog>
+       
         <ContentDialog
             x:Name="SaveInkConfirmDialog"
              Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
@@ -369,5 +386,6 @@
             </Grid>
         </ContentDialog>
     </Grid>
+  
 </UserControl>
     

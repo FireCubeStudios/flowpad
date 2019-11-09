@@ -618,6 +618,11 @@ namespace flowpad.UserControls
             var dialog = new WhatsNewDialog();
             await dialog.ShowAsync();
         }
+        private async void Welcome_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new FirstRunDialog();
+            await dialog.ShowAsync();
+        }
 
         private void InkToolbarCustomToggleButtonPen_Click(object sender, RoutedEventArgs e)
         {
@@ -706,7 +711,7 @@ namespace flowpad.UserControls
 
                     if (status == Windows.Storage.Provider.FileUpdateStatus.Complete)
                     {
-                        await SaveFileDialogSaved.ShowAsync(); // the notification will appear for 2 seconds
+                        SaveFileConfirmed.IsOpen = true; // the notification will appear for 2 seconds
                         FileSaved = true;
                     }
                     else
@@ -743,7 +748,7 @@ namespace flowpad.UserControls
 
                 if (status == Windows.Storage.Provider.FileUpdateStatus.Complete)
                 {
-                    await SaveFileDialogSaved.ShowAsync(); // the notification will appear for 2 seconds
+                    SaveFileConfirmed.IsOpen = true; // the notification will appear for 2 seconds
                     FileSaved = true;
                 }
                 else
@@ -770,11 +775,7 @@ namespace flowpad.UserControls
 
 
 
-        private async void Openlocation_ClickAsync(ContentDialog sender, ContentDialogButtonClickEventArgs e)
-        {
-            var appFolder = await Windows.Storage.KnownFolders.PicturesLibrary.GetFolderAsync("InkDrawings");
-            await Launcher.LaunchFolderAsync(appFolder);
-        }
+
 
         List<Images> ImageCollection;
         private async void FilesDialog_Click(object sender, RoutedEventArgs e)
@@ -1026,109 +1027,210 @@ namespace flowpad.UserControls
 
         {
 
-            if (e.ClickedItem != null) { 
+            if (e.ClickedItem != null) {
 
 
                 OpenFileDialogPrompt.IsPrimaryButtonEnabled = true;
-            OpenFileDialogPrompt.IsSecondaryButtonEnabled = true;
-            var V = e.ClickedItem as Images;
-            FileOpen = V.ImagePath;
-        }
+                OpenFileDialogPrompt.IsSecondaryButtonEnabled = true;
+                var V = e.ClickedItem as Images;
+                FileOpen = V.ImagePath;
+            }
 
-    }
-    private void FileSaveCheck_Click(InkStrokeInput sender, PointerEventArgs args)
-    {
-        if (FileSaved == true)
+        }
+        private void FileSaveCheck_Click(InkStrokeInput sender, PointerEventArgs args)
         {
-            FileSaved = false;
+            if (FileSaved == true)
+            {
+                FileSaved = false;
+            }
+            return;
         }
-        return;
-    }
-    public class Images
-    {
-        public ImageSource ImageURL { get; set; }
-        public string ImageText { get; set; }
-        public string ImagePath { get; internal set; }
-    }
-    private async void Printer_Click(object sender, RoutedEventArgs e)
-    {
-   
-                IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-                if (currentStrokes.Count == 0)
+        public class Images
+        {
+            public ImageSource ImageURL { get; set; }
+            public string ImageText { get; set; }
+            public string ImagePath { get; internal set; }
+        }
+        private async void Printer_Click(object sender, RoutedEventArgs e)
+        {
+
+            IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+            if (currentStrokes.Count == 0)
+            {
+                return;
+            }
+            // Create a new PrintHelperOptions instance
+            var defaultPrintHelperOptions = new PrintHelperOptions();
+
+            // Configure options that you want to be displayed on the print dialog
+            defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Orientation);
+            defaultPrintHelperOptions.Orientation = PrintOrientation.Landscape;
+
+            defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Copies);
+            defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Orientation);
+            defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.MediaSize);
+            defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Collation);
+            defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Duplex);
+            // Create a new PrintHelper instance
+            // "container" is a XAML panel that will be used to host printable control. 
+            // It needs to be in your visual tree but can be hidden with Opacity = 0
+            var inkStream = new InMemoryRandomAccessStream();
+            await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(inkStream.GetOutputStreamAt(0));
+            var inkBitmap = new BitmapImage();
+            await inkBitmap.SetSourceAsync(inkStream);
+
+            // You need to adjust Margin to layout the image properly in the print-page. 
+            var inkBounds = inkCanvas.InkPresenter.StrokeContainer.BoundingRect;
+            var inkMargin = new Thickness(inkBounds.Left, inkBounds.Top, inkCanvas.ActualWidth - inkBounds.Right, inkCanvas.ActualHeight - inkBounds.Bottom);
+
+            // Prepare Viewbox+Image to be printed.
+            var inkViewbox = new Viewbox()
+            {
+                Child = new Image()
                 {
-                    return;
-                }
-                // Create a new PrintHelperOptions instance
-                var defaultPrintHelperOptions = new PrintHelperOptions();
+                    Source = inkBitmap,
+                    Margin = inkMargin
+                },
+                Width = inkCanvas.ActualWidth,
+                Height = inkCanvas.ActualHeight
+            };
 
-                // Configure options that you want to be displayed on the print dialog
-                defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Orientation);
-                defaultPrintHelperOptions.Orientation = PrintOrientation.Landscape;
+            printHelper = new PrintHelper(PanelC, defaultPrintHelperOptions);
+            printHelper.AddFrameworkElementToPrint(inkViewbox);
 
-                defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Copies);
-                defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Orientation);
-                defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.MediaSize);
-                defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Collation);
-                defaultPrintHelperOptions.AddDisplayOption(StandardPrintTaskOptions.Duplex);
-                // Create a new PrintHelper instance
-                // "container" is a XAML panel that will be used to host printable control. 
-                // It needs to be in your visual tree but can be hidden with Opacity = 0
-                var inkStream = new InMemoryRandomAccessStream();
-                await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(inkStream.GetOutputStreamAt(0));
-                var inkBitmap = new BitmapImage();
-                await inkBitmap.SetSourceAsync(inkStream);
+            printHelper.OnPrintFailed += PrintHelper_OnPrintFailed;
+            printHelper.OnPrintSucceeded += PrintHelper_OnPrintSucceeded;
 
-                // You need to adjust Margin to layout the image properly in the print-page. 
-                var inkBounds = inkCanvas.InkPresenter.StrokeContainer.BoundingRect;
-                var inkMargin = new Thickness(inkBounds.Left, inkBounds.Top, inkCanvas.ActualWidth - inkBounds.Right, inkCanvas.ActualHeight - inkBounds.Bottom);
+            // Start printing process
+            await printHelper.ShowPrintUIAsync("Flowpad");
 
-                // Prepare Viewbox+Image to be printed.
-                var inkViewbox = new Viewbox()
-                {
-                    Child = new Image()
-                    {
-                        Source = inkBitmap,
-                        Margin = inkMargin
-                    },
-                    Width = inkCanvas.ActualWidth,
-                    Height = inkCanvas.ActualHeight
-                };
+            // Event handlers
+            printHelper.Dispose();
 
-                printHelper = new PrintHelper(PanelC, defaultPrintHelperOptions);
-                printHelper.AddFrameworkElementToPrint(inkViewbox);
+        }
+        private async void PrintHelper_OnPrintSucceeded()
+        {
+            printHelper.Dispose();
+            var dialog = new MessageDialog("Printing successful.");
+            await dialog.ShowAsync();
+        }
 
-                printHelper.OnPrintFailed += PrintHelper_OnPrintFailed;
-                printHelper.OnPrintSucceeded += PrintHelper_OnPrintSucceeded;
+        private async void PrintHelper_OnPrintFailed()
+        {
+            printHelper.Dispose();
+            var dialog = new MessageDialog("Printing failed.");
+            await dialog.ShowAsync();
+        }
 
-                // Start printing process
-                await printHelper.ShowPrintUIAsync("Flowpad");
-
-                // Event handlers
-                printHelper.Dispose();
-
-    }
-    private async void PrintHelper_OnPrintSucceeded()
-    {
-        printHelper.Dispose();
-        var dialog = new MessageDialog("Printing successful.");
-        await dialog.ShowAsync();
-    }
-
-    private async void PrintHelper_OnPrintFailed()
-    {
-        printHelper.Dispose();
-        var dialog = new MessageDialog("Printing failed.");
-        await dialog.ShowAsync();
-    }
-       
         private void InkCanvas_ContextRequested(UIElement sender, Windows.UI.Xaml.Input.ContextRequestedEventArgs args)
-    {
-        FlyoutShowOptions Option = new FlyoutShowOptions();
-        Option.ShowMode = FlyoutShowMode.Transient;
+        {
+            FlyoutShowOptions Option = new FlyoutShowOptions();
+            Option.ShowMode = FlyoutShowMode.Transient;
 
-        CommandBarFlyoutCommands.ShowAt(inkCanvas, Option);
+            CommandBarFlyoutCommands.ShowAt(inkCanvas, Option);
+        }
+
+        private void InkSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            AutoSaveTip.IsOpen = true;
+        }
+
+        private async void SaveFileConfirmed_ActionButtonClick(MUXC.TeachingTip sender, object args)
+        {
+            var appFolder = await Windows.Storage.KnownFolders.PicturesLibrary.GetFolderAsync("InkDrawings");
+            await Launcher.LaunchFolderAsync(appFolder);
+        }
+
+        private void TiltSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (inkCanvas.InkPresenter != null)
+
+                {
+                    var drawingAttributes = inkCanvas.InkPresenter.CopyDefaultDrawingAttributes();
+                    ToggleSwitch toggleSwitch = sender as ToggleSwitch;
+                    if (toggleSwitch != null)
+                    {
+                        if (toggleSwitch.IsOn == true)
+                        {
+                            drawingAttributes.IgnoreTilt = false;
+                        }
+                        else
+                        {
+                            drawingAttributes.IgnoreTilt = true;
+                        }
+                        inkCanvas.InkPresenter.UpdateDefaultDrawingAttributes(drawingAttributes);
+                    }
+                }
+            }
+            catch
+            {
+                
+            }
+        }
+        private void PressureSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (inkCanvas.InkPresenter != null)
+
+                {
+                    var drawingAttributes = inkCanvas.InkPresenter.CopyDefaultDrawingAttributes();
+            ToggleSwitch toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                if (toggleSwitch.IsOn == true)
+                {
+                    drawingAttributes.IgnorePressure = false;
+                }
+                else
+                {
+                    drawingAttributes.IgnorePressure = true;
+        
+                }
+                inkCanvas.InkPresenter.UpdateDefaultDrawingAttributes(drawingAttributes);
+                    }
+                }
+        }
+            catch
+            {
+                
+            }
+        }
+
+            private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+            {
+            try
+            {
+                if (inkCanvas.InkPresenter != null)
+
+                    {
+                        var drawingAttributes = inkCanvas.InkPresenter.CopyDefaultDrawingAttributes();
+            ComboBox comboBox = sender as ComboBox;
+            Windows.UI.Input.Inking.InkManager inkManager =
+  new Windows.UI.Input.Inking.InkManager();
+            // Get the ComboBox selected item text
+            string indexTip = comboBox.SelectedItem.ToString();
+            switch (indexTip)
+            {
+                case "Circle":
+                    drawingAttributes.PenTip = PenTipShape.Circle;
+                    break;
+                case "Rectangle":
+                    drawingAttributes.PenTip = PenTipShape.Rectangle;
+                    break;
+            }
+            inkCanvas.InkPresenter.UpdateDefaultDrawingAttributes(drawingAttributes);
+            }
     }
-}
+            catch
+            {
+                
+            }
+        }
+
+        }
     }
 
 
