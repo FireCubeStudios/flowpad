@@ -10,7 +10,7 @@
     xmlns:helper="using:flowpad.Helpers"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:muxcontrols="using:Microsoft.UI.Xaml.Controls"
-     xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
+     xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions" xmlns:transformers="using:FanKit.Transformers"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400"
@@ -19,7 +19,9 @@
         <helper:EnumToBooleanConverter x:Key="EnumToBooleanConverter" EnumType="ElementTheme"/>
         <media:AcrylicBrush x:Key="CustomAcrylicBackgroundBrush" BackgroundSource="Backdrop"
         TintOpacity="0.8"/>
-      
+        <transformers:CanvasTransformer x:Name="CanvasTransformer"/>
+        <transformers:CanvasOperator x:Name="CanvasOperator" DestinationControl="{Binding ElementName=inkCanvas}"/>
+
         <DataTemplate x:Key="Photos">
             <Grid Background="White">
                 <Image x:Name="ThumbnailImage" Source="{Binding ImageURL}"
@@ -69,6 +71,7 @@
             <Pivot x:Name="NavigationRibbon" x:Load="False" RequestedTheme="Default" Canvas.ZIndex="50" Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}">
                 <Pivot.LeftHeader>
                     <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" x:Name="SideLeftBar" IsOpen="False" DefaultLabelPosition="Right" OverflowButtonVisibility="Collapsed">
+                        <AppBarButton ToolTipService.ToolTip="Home" x:Name="Home" Icon="Home" Click="Home_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" ></AppBarButton>
                         <AppBarButton ToolTipService.ToolTip="Open settings" x:Name="Setting" Icon="Setting" Click="Setting_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" ></AppBarButton>
                         <AppBarButton ToolTipService.ToolTip="Open files" x:Name="filesDialog" Icon="Pictures" Click="FilesDialog_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" ></AppBarButton>
                     </CommandBar>
@@ -230,12 +233,25 @@
 
                                     <StackPanel Margin="{StaticResource XSmallTopMargin}">
                                         <TextBlock
-                    Text="{x:Bind VersionDescription, Mode=OneWay}"
-                    Style="{ThemeResource BodyTextBlockStyle}" />
+                    
+                    Margin="{StaticResource XSmallTopMargin}"
+                    Style="{ThemeResource BodyTextBlockStyle}" Text="Made by FireCubeStudios"/>
                                         <TextBlock
                     
                     Margin="{StaticResource XSmallTopMargin}"
-                    Style="{ThemeResource BodyTextBlockStyle}" Text="FireCubeStudios, Consider donating to support the development of this app."/>
+                    Style="{ThemeResource BodyTextBlockStyle}" Text="Join our discord server:"/>
+                                        <HyperlinkButton
+                    Content="Discord server"
+                    Margin="{StaticResource XSmallTopMargin}"
+                    NavigateUri="https://discord.gg/3WYcKat"/>
+                                        <TextBlock
+                    
+                    Margin="{StaticResource XSmallTopMargin}"
+                    Style="{ThemeResource BodyTextBlockStyle}" Text="Icon made by Loris Oberlander. Check out his work:"/>
+                                        <HyperlinkButton
+                    Content="Loris designs"
+                    Margin="{StaticResource XSmallTopMargin}"
+                    NavigateUri="https://twitter.com/lorisobidesign"/>
                                         <!--x:Uid="Settings_AboutDescription"-->
                                         <HyperlinkButton
                     Content="Privacy Statement"

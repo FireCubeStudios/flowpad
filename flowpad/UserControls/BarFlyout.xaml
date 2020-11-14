@@ -54,7 +54,7 @@
 
             <animations:Implicit.ShowAnimations>
 
-                <animations:TranslationAnimation Duration="0:0:0.5" From="-500, 0, 0" To="0"/>
+                <animations:TranslationAnimation Duration="0:0:0.5" From="0, 0, -500" To="0"/>
 
             </animations:Implicit.ShowAnimations>
 
@@ -64,7 +64,7 @@
 
             <animations:Implicit.HideAnimations>
 
-                <animations:TranslationAnimation Duration="0:0:0.5" From="0" To="-600, 0, 0"/>
+                <animations:TranslationAnimation Duration="0:0:0.5" From="0" To="0, 0, -600"/>
 
             </animations:Implicit.HideAnimations>
 

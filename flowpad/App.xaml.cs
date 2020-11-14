@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.ExceptionServices;
+using System.Threading.Tasks;
 using flowpad.Core.Helpers;
 using flowpad.Services;
 using flowpad.Views;
@@ -27,7 +29,10 @@ namespace flowpad
             InitializeComponent();
             EnteredBackground += App_EnteredBackground;
             Resuming += App_Resuming;
-
+            UnhandledException += OnUnhandledException;
+          
+            TaskScheduler.UnobservedTaskException += OnUnobservedException;
+            AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
             // Deferred execution until used. Check https://msdn.microsoft.com/library/dd642331(v=vs.110).aspx for further info on Lazy<T> class.
             _activationService = new Lazy<ActivationService>(CreateActivationService);
             // Deferred execution until used. Check https://msdn.microsoft.com/library/dd642331(v=vs.110).aspx for further info on Lazy<T> class.
@@ -42,6 +47,26 @@ namespace flowpad
                 await ActivationService.ActivateAsync(args);     
             }
         }
+        private static void OnUnobservedException(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            // Occurs when an exception is not handled on a background thread.
+            // ie. A task is fired and forgotten Task.Run(() => {...})
+
+
+            // suppress and handle it manually.
+            e.SetObserved();
+        }
+
+        private static void OnUnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
+        {
+            e.Handled = true;
+        }
+ 
+        private void CurrentDomain_FirstChanceException(object sender, FirstChanceExceptionEventArgs e)
+        {
+ 
+        }
+
         protected override async void OnActivated(IActivatedEventArgs args)
         {
             await ActivationService.ActivateAsync(args);
@@ -49,7 +74,7 @@ namespace flowpad
 
         private ActivationService CreateActivationService()
         {
-            return new ActivationService(this, typeof(Views.InkPage));
+            return new ActivationService(this, typeof(Views.HomePage));
         }
 
         private  void App_EnteredBackground(object sender, EnteredBackgroundEventArgs e)

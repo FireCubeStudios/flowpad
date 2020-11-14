@@ -1,0 +1,142 @@
+﻿<Page
+    x:Class="flowpad.Views.WhiteboardPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:flowpad.Views"
+          xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:helper="using:flowpad.Helpers"
+    mc:Ignorable="d"
+    Background="#1f1f1f">
+    <Page.Resources>
+        <helper:EnumToBooleanConverter x:Key="EnumToBooleanConverter" EnumType="ElementTheme"/>
+    </Page.Resources>
+
+  
+        <SplitView x:Name="SettingsSplitView" PaneBackground="{ThemeResource SystemControlAcrylicElementBrush}"
+        PanePlacement="Right" OpenPaneLength="400" DisplayMode="Overlay">
+        <SplitView.Pane>
+                <Grid Margin="0, 0, 0, 0" >
+                    <Pivot Margin="0, 30, 0, 0">
+                        <PivotItem Header="Settings">
+                            <StackPanel x:Name="ContentArea">
+                                <TextBlock
+                x:Uid="Settings_Personalization"
+                Style="{ThemeResource SubtitleTextBlockStyle}" />
+                                <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
+                                    <TextBlock
+                    x:Uid="Settings_Theme" />
+
+                                    <StackPanel Margin="{StaticResource XSmallTopMargin}">
+                                        <RadioButton 
+                        x:Uid="Settings_Theme_Light" 
+                        GroupName="AppTheme" 
+                        Checked="ThemeChanged_CheckedAsync" 
+                        IsChecked="{x:Bind ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}"
+                        FontSize="15">
+                                            <RadioButton.CommandParameter>
+                                                <d:ElementTheme>Light</d:ElementTheme>
+                                            </RadioButton.CommandParameter>
+                                        </RadioButton>
+                                        <RadioButton 
+                        x:Uid="Settings_Theme_Dark" 
+                        GroupName="AppTheme"
+                        Checked="ThemeChanged_CheckedAsync" 
+                        IsChecked="{x:Bind ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}"
+                        FontSize="15">
+                                            <RadioButton.CommandParameter>
+                                                <d:ElementTheme>Dark</d:ElementTheme>
+                                            </RadioButton.CommandParameter>
+                                        </RadioButton>
+                                        <RadioButton 
+                        x:Uid="Settings_Theme_Default"
+                        GroupName="AppTheme"
+                        Checked="ThemeChanged_CheckedAsync"
+                        IsChecked="{x:Bind ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Default, Mode=OneWay}"
+                        FontSize="15">
+                                            <RadioButton.CommandParameter>
+                                                <d:ElementTheme>Default</d:ElementTheme>
+                                            </RadioButton.CommandParameter>
+                                        </RadioButton>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Click="LivePin" Margin="10">Pin to startscreen</Button>
+                                    <Button Click="PinAppToTaskbar_Click" Margin="10">Pin to taskbar</Button>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Click="Rate_Click" Margin="10">Rate Flowpad</Button>
+                                    <Button IsEnabled="False" x:Name="Feedbackbutton" FontFamily="Segoe MDL2 Assets" Content="&#xE939;" Margin="10" Click="FeedbackLink_Click">
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </PivotItem>
+                        <PivotItem Header="What's new">
+                            <StackPanel Orientation="Vertical">
+                                <Button x:Name="FirstRun" Click="Welcome_Click" Margin="10" VerticalAlignment="Center">Welcome</Button>
+                                <Button x:Name="Whatsnew" Click="Whatsnew_Click" Margin="10" VerticalAlignment="Center">What's new</Button>
+                            </StackPanel>
+                        </PivotItem>
+                        <PivotItem Header="About">
+                            <StackPanel>
+                                <TextBlock
+                    x:Uid="Settings_About"
+                    Style="{ThemeResource SubtitleTextBlockStyle}"/>
+
+                                <StackPanel Margin="{StaticResource XSmallTopMargin}">
+                                    <TextBlock
+                    Text="{x:Bind VersionDescription, Mode=OneWay}"
+                    Style="{ThemeResource BodyTextBlockStyle}" />
+                                    <TextBlock
+                    
+                    Margin="{StaticResource XSmallTopMargin}"
+                    Style="{ThemeResource BodyTextBlockStyle}" Text="Made by FireCubeStudios"/>
+                                <TextBlock
+                    
+                    Margin="{StaticResource XSmallTopMargin}"
+                    Style="{ThemeResource BodyTextBlockStyle}" Text="Join our discord server:"/>
+                                <HyperlinkButton
+                    Content="Discord server"
+                    Margin="{StaticResource XSmallTopMargin}"
+                    NavigateUri="https://discord.gg/3WYcKat"/>
+                                <TextBlock
+                    
+                    Margin="{StaticResource XSmallTopMargin}"
+                    Style="{ThemeResource BodyTextBlockStyle}" Text="Icon made by Loris Oberlander. Check out his work:"/>
+                                <HyperlinkButton
+                    Content="Loris designs"
+                    Margin="{StaticResource XSmallTopMargin}"
+                    NavigateUri="https://twitter.com/lorisobidesign"/>
+                                <!--x:Uid="Settings_AboutDescription"-->
+                                    <HyperlinkButton
+                    Content="Privacy Statement"
+                    Margin="{StaticResource XSmallTopMargin}"
+                    NavigateUri="https://www.websitepolicies.com/policies/view/vINyITTB"/>
+                                    <!--x:Uid="Settings_PrivacyTermsLink"-->
+                                    <!-- <HyperlinkButton
+                    x:Uid="FeedbackHub_Link"
+                    x:Name="FeedbackLink"
+                    Visibility="Collapsed"
+                    Click="FeedbackLink_Click"
+                    Margin="{StaticResource EightTopMargin}" />-->
+                                </StackPanel>
+                            </StackPanel>
+                        </PivotItem>
+                    </Pivot>
+
+
+
+                </Grid>
+            </SplitView.Pane>
+        <Grid>
+            <CommandBar Canvas.ZIndex="100" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0, 36, 0, 0" Background="Transparent" x:Name="SideLeftBar" IsOpen="False" DefaultLabelPosition="Right" OverflowButtonVisibility="Collapsed">
+                <AppBarButton ToolTipService.ToolTip="Save" x:Name="Save" Icon="Save" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="Save_Click"></AppBarButton>
+                <AppBarButton ToolTipService.ToolTip="Home" x:Name="Home" Icon="Home" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="Home_Click"></AppBarButton>
+                <AppBarButton ToolTipService.ToolTip="Open settings" x:Name="Setting" Icon="Setting"  BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="Setting_Click"></AppBarButton>
+            </CommandBar>
+            <controls:InfiniteCanvas x:Name="canvas" HorizontalAlignment="Center" Margin="0, 30, 0, 0" IsToolbarVisible="True"/>
+        </Grid>
+    </SplitView>
+ 
+</Page>

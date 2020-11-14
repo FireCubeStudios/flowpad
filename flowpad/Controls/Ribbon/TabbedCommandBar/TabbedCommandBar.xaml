@@ -1,0 +1,55 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:flowpad.Controls.Ribbon">
+
+    <StaticResource x:Key="TabbedCommandBarContentBackground" ResourceKey="SystemControlChromeLowAcrylicWindowBrush" />
+    <Style TargetType="local:TabbedCommandBar">
+        <Setter Property="Background" Value="{ThemeResource SystemControlChromeMediumLowAcrylicWindowMediumBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:TabbedCommandBar">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <NavigationView
+                            x:Name="PART_RibbonNavigationView"
+                            Background="{TemplateBinding Background}"
+                            PaneDisplayMode="Top"
+                            Style="{StaticResource RibbonTabNavigationViewStyle}">
+                            <!--
+                                For some reason, this data template refuses to let me set the x:DataType. I get the following error:
+                                XamlCompiler error WMC0612: The XAML Binary Format (XBF) generator
+                                reported syntax error '0x09C4' : Property Not Found
+                            -->
+                            <NavigationView.MenuItemTemplate>
+                                <DataTemplate>
+                                    <NavigationViewItem HorizontalAlignment="Stretch" Content="{Binding Header}" />
+                                </DataTemplate>
+                            </NavigationView.MenuItemTemplate>
+                        </NavigationView>
+
+                        <Border
+                            Grid.Row="1"
+                            HorizontalAlignment="Stretch"
+                            Background="{ThemeResource TabbedCommandBarContentBackground}">
+                            <ContentControl x:Name="PART_RibbonContent">
+                                <ContentControl.Resources>
+                                    <Style TargetType="AppBarElementContainer">
+                                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="Margin" Value="0,0,2,0" />
+                                    </Style>
+                                </ContentControl.Resources>
+                            </ContentControl>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

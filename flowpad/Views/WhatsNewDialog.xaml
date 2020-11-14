@@ -21,22 +21,26 @@
             <!-- x:Uid="WhatsNew_Body"-->
             <TextBlock
                IsTextSelectionEnabled="True"
-                TextWrapping="WrapWholeWords">New Features and changes for update 3.7.8:
+                TextWrapping="WrapWholeWords">New Features and changes for update 5.0:
                 <LineBreak/>
-                -Flowpad GO for android has been released.
+                -New Projects page
                 <LineBreak/>
-                -Designed for touch and light weight app thats only 1.02 mb compared to flowpad for desktop with 44.05 mb
+                -New homepage
                 <LineBreak/>
-                -Flowpad GO has exclusive features including:
-                 <LineBreak/>
-                -Annotating images
-                 <LineBreak/>
-                -adding shapes, lines and flood fill bucket
-                 <LineBreak/>
-                -Point eraser and onscreen color picker
-                 <LineBreak/>
+                -New whiteboard mode
+                <LineBreak/>
                 -Bug fixes and performance improvements
             </TextBlock>
+            <!---   x:Uid="FirstRun_Body"-->
+            <TextBlock
+             
+                TextWrapping="WrapWholeWords" Text="Join our discord server for 6.0 progress"/>
+
+
+            <HyperlinkButton
+                Content="Discord server"
+                    Margin="{StaticResource XSmallTopMargin}"
+                    NavigateUri="https://discord.gg/3WYcKat"/>
         </StackPanel>
     </ScrollViewer>
 </ContentDialog>

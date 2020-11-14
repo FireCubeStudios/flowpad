@@ -111,8 +111,7 @@ namespace flowpad.UserControls
                 undoRedoService.RedoEvent += (s, e) => RefreshEnabledButtons();
                 undoRedoService.AddUndoOperationEvent += (s, e) => RefreshEnabledButtons();
                 //pointerDeviceService.DetectPenEvent += (s, e) => TouchInkingButtonIsChecked = false;
-
-            };
+                };
 
             if (ImageGridView != null)
 
@@ -484,9 +483,7 @@ namespace flowpad.UserControls
          }*/
         private async void FeedbackLink_Click(object sender, RoutedEventArgs e)
         {
-            //This launcher is part of the Store Services SDK https://docs.microsoft.com/en-us/windows/uwp/monetize/microsoft-store-services-sdk
-            var launcher = Microsoft.Services.Store.Engagement.StoreServicesFeedbackLauncher.GetDefault();
-            await launcher.LaunchAsync();
+            await Launcher.LaunchUriAsync(new Uri("https://discord.gg/3WYcKat"));
         }
         private async void Rate_Click(object sender, RoutedEventArgs e)
         {
@@ -1230,7 +1227,56 @@ namespace flowpad.UserControls
             }
         }
 
-        }
+        private async void Home_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var Folder = await Windows.Storage.KnownFolders.PicturesLibrary.GetFolderAsync("Shared");
+                await Folder.DeleteAsync();
+                try
+                {
+
+                    IReadOnlyList<InkStroke> currentStrokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+
+
+
+                    if (currentStrokes.Count == 0 || FileSaved == true)
+                    {
+                        InkPage.InkFrame.Navigate(typeof(HomePage));
+                    }
+                    else
+                    {
+
+
+                        var result = await SaveInkConfirmDialog.ShowAsync();
+                        if (result == ContentDialogResult.Primary)
+                        {
+                            await SaveFileDialogPrompt.ShowAsync();
+                        }
+                        else if (result == ContentDialogResult.Secondary)
+                        {
+                            SaveFileDialogPrompt.Hide();
+                            InkPage.InkFrame.Navigate(typeof(HomePage));
+                        }
+                        else
+                        {
+                            InkPage.InkFrame.Navigate(typeof(HomePage));
+                        }
+
+                    }
+                }
+                catch
+                {
+                    InkPage.InkFrame.Navigate(typeof(HomePage));
+
+                }
+            }
+            catch
+            {
+                InkPage.InkFrame.Navigate(typeof(HomePage));
+            }
+            }
+    }
     }
 
 

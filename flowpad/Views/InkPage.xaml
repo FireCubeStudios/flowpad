@@ -6,11 +6,447 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Style="{StaticResource PageStyle}"
     mc:Ignorable="d"
-    xmlns:usercontrols1="using:flowpad.UserControls">
+    xmlns:usercontrols1="using:flowpad.UserControls"
+    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+        xmlns:xaml="using:Windows.UI.Xaml"
+    xmlns:muxcontrols="using:Microsoft.UI.Xaml.Controls"
+    xmlns:helper="using:flowpad.Helpers"
+    xmlns:ribbon="using:flowpad.Controls.Ribbon"
+    xmlns:transformers="using:FanKit.Transformers"
+    xmlns:hsvColorPickers="using:HSVColorPickers"
+        Background="{ThemeResource 24Brush}"
+    xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml" xmlns:local="using:flowpad.Pens">
 
-    <Grid x:Name="ContentArea">
-        <usercontrols1:InkCanvasUserControl></usercontrols1:InkCanvasUserControl>
+    <Page.Resources>
+        <local:CalligraphicPen x:Key="CalligraphicPen" />
+        <!-- Specify the colors for the palette of the custom pen. -->
+
+        <helper:EnumToBooleanConverter x:Key="EnumToBooleanConverter" EnumType="ElementTheme"/>
+        <d:AcrylicBrush x:Key="CustomAcrylicBackgroundBrush" BackgroundSource="Backdrop"
+        TintOpacity="0.8"/>
+        <transformers:CanvasTransformer x:Name="CanvasTransformer"/>
+        <transformers:CanvasOperator x:Name="CanvasOperator" DestinationControl="{Binding ElementName=CanvasControl}"/>
+        <DataTemplate x:Key="Photos">
+            <Grid Background="White">
+                <Image x:Name="ThumbnailImage" Source="{Binding ImageURL}"
+                           Stretch="UniformToFill"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center">
+
+                </Image>
+                <Grid Background="Black" Height="30" VerticalAlignment="Top">
+                    <TextBlock FontWeight="Thin" Text="{Binding ImageText}"
+                           FontSize="20" Foreground="White" >
+                    </TextBlock>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+        <muxcontrols:CommandBarFlyout Placement="Right" x:Name="CommandBarFlyoutCommands">
+            <AppBarButton ToolTipService.ToolTip="Undo" x:Uid="InkSmartCanvas_UndoButton" Icon="Undo" Click="Undo_Click"  BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            <AppBarButton ToolTipService.ToolTip="Redo" x:Uid="InkSmartCanvas_RedoButton" Icon="Redo" Click="Redo_Click"  BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            <AppBarSeparator/>
+            <AppBarButton x:Uid="InkDraw_CutButton" Icon="Cut" Click="Cut_Click"   BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            <AppBarButton x:Uid="InkDraw_CopyButton" Icon="Copy" Click="Copy_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            <AppBarButton x:Uid="InkDraw_PasteButton" Icon="Paste" Click="Paste_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            <AppBarButton ToolTipService.ToolTip="Clear all" x:Uid="InkSmartCanvasView_ClearAllButton" Icon="Delete" Click="ClearAll_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            <AppBarSeparator/>
+            <AppBarButton ToolTipService.ToolTip="Zoom in" Icon="ZoomIn" Label="Zoom in" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="ZoomIn_Click"></AppBarButton>
+            <AppBarButton ToolTipService.ToolTip="Zoom out" Icon="ZoomOut" Label="Zoom out" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="ZoomOut_Click"></AppBarButton>
+            <AppBarButton ToolTipService.ToolTip="Original size" Icon="FullScreen" Label="Original size" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="ResetZoom_Click"></AppBarButton>
+           <!-- <AppBarButton ToolTipService.ToolTip="Fit to screen" Label="Fit to screen" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="FitToScreen_Click"></AppBarButton>-->
+            <muxcontrols:CommandBarFlyout.SecondaryCommands>
+                <AppBarButton ToolTipService.ToolTip="Open files" Label="Open ink file" Icon="OpenFile" Click="FilesDialog_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                <AppBarSeparator/>
+                <AppBarButton ToolTipService.ToolTip="Save ink file" Label="Save ink file" Icon="Save" Click="SaveInkFileInApp_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                <AppBarButton ToolTipService.ToolTip="Save ink file via file explorer"  Label="Save ink file via file explorer" Icon="SaveLocal" Click="SaveInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                <AppBarButton ToolTipService.ToolTip="Open ink file via file explorer" x:Uid="Ink_LoadInkFileButton" Icon="OpenLocal" Click="LoadInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                <AppBarSeparator/>
+                <AppBarButton ToolTipService.ToolTip="Export as image" Label="Export as image" Icon="Download" Click="SaveFileAsImage" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                <AppBarSeparator/>
+                <!--<AppBarButton ToolTipService.ToolTip="Print" Label="Print ink" Icon="Print" Click="Printer_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />-->
+                <AppBarButton ToolTipService.ToolTip="Share" Label="Share ink file" Icon="Share" Click="ShowShareDialog" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+            </muxcontrols:CommandBarFlyout.SecondaryCommands>
+        </muxcontrols:CommandBarFlyout>
+
+    </Page.Resources>
+    <Grid>
+     
+        <Grid x:Name="TitleGrid" Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"></Grid>
+        <Grid x:Name="InkGrid">
+            <StackPanel Orientation="Horizontal" Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" Margin="0, 33, 0, 0">
+                <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" x:Name="SideLeftBar" IsOpen="False" DefaultLabelPosition="Right" OverflowButtonVisibility="Collapsed">
+                    <AppBarButton ToolTipService.ToolTip="Home" x:Name="Home" Icon="Home" Click="Home_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" ></AppBarButton>
+                    <AppBarButton ToolTipService.ToolTip="Open settings" x:Name="Setting" Icon="Setting" Click="Setting_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" ></AppBarButton>
+                    <!--  <AppBarButton ToolTipService.ToolTip="Open files" x:Name="filesDialog" Icon="Pictures" Click="FilesDialog_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" ></AppBarButton>-->
+                    <AppBarSeparator/>
+                    <AppBarButton ToolTipService.ToolTip="File options" Icon="Save" Label="Files" BorderBrush="Transparent" BorderThickness="0,0,0,0" >
+                        <AppBarButton.Flyout>
+                            <MenuFlyout Placement="Bottom">
+                                <MenuFlyoutItem ToolTipService.ToolTip="Open files" Text="Open ink file" Icon="OpenFile" Click="FilesDialog_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                <MenuFlyoutItem ToolTipService.ToolTip="Open ink file via file explorer" Text="Open with file explorer" Icon="OpenLocal" Click="LoadInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                <MenuFlyoutSeparator/>
+                                <MenuFlyoutItem ToolTipService.ToolTip="Save ink file" Text="Save ink file" Icon="Save" Click="SaveInkFileInApp_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                <MenuFlyoutItem ToolTipService.ToolTip="Save ink file via file explorer"  Text="Save ink file via file explorer" Icon="SaveLocal" Click="SaveInkFile_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                <MenuFlyoutSeparator/>
+                                <MenuFlyoutItem ToolTipService.ToolTip="Export as image" Text="Export as image" Icon="Download" Click="SaveFileAsImage" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                <MenuFlyoutItem ToolTipService.ToolTip="Print" Text="Print" Icon="Print" Click="Printer_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                <MenuFlyoutItem ToolTipService.ToolTip="Share" Text="Share ink file" Icon="Share" Click="ShowShareDialog" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                            </MenuFlyout>
+                        </AppBarButton.Flyout>
+                    </AppBarButton>
+                </CommandBar>
+                <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" IsOpen="False" DefaultLabelPosition="Right" x:Name="InkBar" Margin="0,0,300,0">
+                    <CommandBar.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <InkToolbar x:Name="toolbar" Background="Transparent" Loaded="OnInkToolbarLoaded">
+                                <!-- <InkToolbarCustomToolButton x:Uid="Ink_LassoSelectionButton" Background="Transparent" Click="ConfigLassoSelection">
+                                        <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xEF20;" />
+                                        {Binding Content.LassoSelectionButtonIsChecked, ElementName=shellFrame, Mode=TwoWay}
+                                
+                                    </InkToolbarCustomToolButton>-->
+                                <InkToolbarBallpointPenButton x:Name="penButton" />
+                               
+                                <InkToolbarCustomPenButton
+            CustomPen="{StaticResource CalligraphicPen}"
+            Palette="{x:Bind penButton.Palette}"
+            MinStrokeWidth="1" MaxStrokeWidth="3" SelectedStrokeWidth="2"
+            SelectedBrushIndex ="0">
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEDFB;"/>
+                                    <InkToolbarCustomPenButton.ConfigurationContent>
+                                        <InkToolbarPenConfigurationControl />
+                                    </InkToolbarCustomPenButton.ConfigurationContent>
+                                </InkToolbarCustomPenButton>
+                                <InkToolbarCustomToggleButton ToolTipService.ToolTip="Enable touch inking" IsChecked="True" x:Name="TouchInkingButton" Background="Transparent" Click="InkToolbarCustomToggleButtonTouch_Click">
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xED5F;" />
+                                </InkToolbarCustomToggleButton>
+                                <InkToolbarCustomToggleButton ToolTipService.ToolTip="Enable mouse inking" IsChecked="True" x:Name="MouseInkingButton" Background="Transparent" Click="InkToolbarCustomToggleButtonMouse_Click">
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE962;" />
+                                </InkToolbarCustomToggleButton>
+                                <InkToolbarCustomToggleButton ToolTipService.ToolTip="Enable pen inking" IsChecked="True" x:Name="InkSurfacePen" Background="Transparent" Click="InkToolbarCustomToggleButtonPen_Click">
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xEDC6;" />
+                                </InkToolbarCustomToggleButton>
+                                <InkToolbarCustomToggleButton x:Name="Colorpick"
+                                                        ToolTipService.ToolTip="Custom Pen colour" 
+                                                        Click="Colorpick_Click">
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE790;"/>
+                                    <FlyoutBase.AttachedFlyout>
+                                        <Flyout>
+                                            <hsvColorPickers:ColorPicker x:Name="ColorPicker" Background="Transparent" ColorChanged="ColorPicker_ColorChangeCompleted" ColorChangeCompleted="ColorPicker_ColorChangeCompleted"/>
+                                        </Flyout>
+                                    </FlyoutBase.AttachedFlyout>
+                                </InkToolbarCustomToggleButton>
+                                <InkToolbarCustomToolButton x:Uid="InkDraw_LassoSelectionButton" Background="Transparent" IsChecked="{x:Bind LassoSelectionButtonIsChecked, Mode=TwoWay}">
+                                    <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xEF20;" />
+                                </InkToolbarCustomToolButton>
+                            </InkToolbar>
+                            <CommandBar Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}" x:Name="SideBar" IsOpen="False" DefaultLabelPosition="Right" OverflowButtonVisibility="Auto" >
+                                <AppBarButton ToolTipService.ToolTip="Undo" x:Uid="InkSmartCanvas_UndoButton" Icon="Undo" Click="Undo_Click"  BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                <AppBarButton ToolTipService.ToolTip="Redo" x:Uid="InkSmartCanvas_RedoButton" Icon="Redo" Click="Redo_Click"  BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                <AppBarSeparator/>
+                                <AppBarButton x:Uid="InkDraw_CutButton" Icon="Cut" Click="Cut_Click"   BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                <AppBarButton x:Uid="InkDraw_CopyButton" Icon="Copy" Click="Copy_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                <AppBarButton x:Uid="InkDraw_PasteButton" Icon="Paste" Click="Paste_Click" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                <CommandBar.SecondaryCommands>
+                                    <AppBarButton ToolTipService.ToolTip="Zoom in" Icon="ZoomIn" Label="Zoom in" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="ZoomIn_Click"></AppBarButton>
+                                    <AppBarButton ToolTipService.ToolTip="Zoom out" Icon="ZoomOut" Label="Zoom out" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="ZoomOut_Click"></AppBarButton>
+                                    <AppBarSeparator/>
+                                    <AppBarButton ToolTipService.ToolTip="Original size" Icon="FullScreen" Label="Original size" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="ResetZoom_Click"></AppBarButton>
+                                    <AppBarButton ToolTipService.ToolTip="Fit to screen" Label="Fit to screen" BorderBrush="Transparent" BorderThickness="0,0,0,0" Click="FitToScreen_Click">
+                                        <AppBarButton.Icon>
+                                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE73F;"/>
+                                        </AppBarButton.Icon>
+                                    </AppBarButton>
+                                    <AppBarSeparator/>
+                                    <AppBarButton ToolTipService.ToolTip="Grid options" Click="OpenGridButton_Click" Label="Grid">
+                                        <AppBarButton.Icon>
+                                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xF0E2;"/>
+                                        </AppBarButton.Icon>
+                                    </AppBarButton>
+                                    <AppBarToggleButton x:Name="CanvasRulerToggle" Click="CanvasRulerToggle_Click" IsChecked="{x:Bind IsCanvasRulerVisible, Mode=TwoWay}" Label="Toggle Canvas ruler">
+                                        <AppBarToggleButton.Icon>
+                                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xED5E;"/>
+                                        </AppBarToggleButton.Icon>
+                                    </AppBarToggleButton>
+                                    <AppBarButton ToolTipService.ToolTip="Clear all" x:Uid="InkSmartCanvasView_ClearAllButton" Icon="Delete" Click="ClearAll_Click" Label="Clear canvas" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                    <AppBarButton ToolTipService.ToolTip="Open ink settings" Icon="Setting" Click="InkSettingsButton_Click" Label="Pen settings" BorderBrush="Transparent" BorderThickness="0,0,0,0" />
+                                </CommandBar.SecondaryCommands>
+                            </CommandBar>
+                        </StackPanel>
+                    </CommandBar.Content>
+                </CommandBar>
+            </StackPanel>
+            <usercontrols1:BarFlyout Canvas.ZIndex="500" HorizontalAlignment="Left" Margin="10,10,10,10" x:Name="SettingsPanel" x:Load="False" BackdropTapped="MyFancyPanel_BackdropTapped">
+
+                <usercontrols1:BarFlyout.PanelContent>
+                    <Grid Margin="{StaticResource MediumLeftRightMargin}">
+                        <Pivot>
+                            <Pivot.LeftHeader>
+                                <CommandBar Background="Transparent" x:Name="SettingsLeftBar" IsOpen="False" DefaultLabelPosition="Right" OverflowButtonVisibility="Collapsed">
+                                    <AppBarButton Icon="Back" Click="MyFancyPanel_BackdropClicked"></AppBarButton>
+                                </CommandBar>
+                            </Pivot.LeftHeader>
+                            <PivotItem Header="Settings">
+                                <Grid x:Name="ContentArea">
+
+
+                                    <StackPanel Margin="{StaticResource XSmallTopMargin}">
+                                        <RadioButton
+                        x:Uid="Settings_Theme_Light"
+                        Checked="ThemeChanged_CheckedAsync"
+                        IsChecked="{x:Bind ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}"
+                        FontSize="15"
+                        Content="Light"
+                        GroupName="AppTheme">
+                                            <RadioButton.CommandParameter>
+                                                <xaml:ElementTheme>Light</xaml:ElementTheme>
+                                            </RadioButton.CommandParameter>
+                                        </RadioButton>
+                                        <RadioButton
+                        x:Uid="Settings_Theme_Dark"
+                        Checked="ThemeChanged_CheckedAsync"
+                        IsChecked="{x:Bind ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}"
+                        FontSize="15"
+                        Content="Dark"
+                        GroupName="AppTheme">
+                                            <RadioButton.CommandParameter>
+                                                <xaml:ElementTheme>Dark</xaml:ElementTheme>
+                                            </RadioButton.CommandParameter>
+                                        </RadioButton>
+                                        <RadioButton
+                        x:Uid="Settings_Theme_Default"
+                       Content="Default"
+                        Checked="ThemeChanged_CheckedAsync"
+                        IsChecked="{x:Bind ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Default, Mode=OneWay}"
+                        FontSize="15"
+                        GroupName="AppTheme">
+                                            <RadioButton.CommandParameter>
+                                                <xaml:ElementTheme>Default</xaml:ElementTheme>
+                                            </RadioButton.CommandParameter>
+                                        </RadioButton>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Click="LivePin" Margin="10">Pin to startscreen</Button>
+                                            <Button Click="PinAppToTaskbar_Click" Margin="10">Pin to taskbar</Button>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Click="Rate_Click" Margin="10">Rate Flowpad</Button>
+                                            <Button IsEnabled="False" x:Name="Feedbackbutton" FontFamily="Segoe MDL2 Assets" Content="&#xE939;" Margin="10" Click="FeedbackLink_Click">
+                                            </Button>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                </Grid>
+                            </PivotItem>
+                            <PivotItem Header="What's new">
+                                <StackPanel Orientation="Vertical">
+                                    <Button x:Name="FirstRun" Click="Welcome_Click" Margin="10" VerticalAlignment="Center">Welcome</Button>
+                                    <Button x:Name="Whatsnew" Click="Whatsnew_Click" Margin="10" VerticalAlignment="Center">What's new</Button>
+                                </StackPanel>
+                            </PivotItem>
+                            <PivotItem Header="About">
+                            <StackPanel>
+                            <TextBlock
+                    x:Uid="Settings_About"
+                    Style="{ThemeResource SubtitleTextBlockStyle}"/>
+
+                                <StackPanel Margin="{StaticResource XSmallTopMargin}">
+                                    <TextBlock
+                    
+                    Margin="{StaticResource XSmallTopMargin}"
+                    Style="{ThemeResource BodyTextBlockStyle}" Text="Made by FireCubeStudios"/>
+                                    <TextBlock
+                    
+                    Margin="{StaticResource XSmallTopMargin}"
+                    Style="{ThemeResource BodyTextBlockStyle}" Text="Join our discord server:"/>
+                                    <HyperlinkButton
+                                       
+                    Content="Discord server"
+                    Margin="{StaticResource XSmallTopMargin}"
+                    NavigateUri="https://discord.gg/3WYcKat"/>
+                                    <TextBlock
+                    
+                    Margin="{StaticResource XSmallTopMargin}"
+                    Style="{ThemeResource BodyTextBlockStyle}" Text="Icon made by Loris Oberlander. Check out his work:"/>
+                                    <HyperlinkButton
+                    Content="Loris designs"
+                    Margin="{StaticResource XSmallTopMargin}"
+                    NavigateUri="https://twitter.com/lorisobidesign"/>
+                                    <!--x:Uid="Settings_AboutDescription"-->
+                                    <HyperlinkButton
+                    Content="Privacy Statement"
+                    Margin="{StaticResource XSmallTopMargin}"
+                    NavigateUri="https://www.websitepolicies.com/policies/view/vINyITTB"/>
+                                    <!--x:Uid="Settings_PrivacyTermsLink"-->
+                                <!-- <HyperlinkButton
+                    x:Uid="FeedbackHub_Link"
+                    x:Name="FeedbackLink"
+                    Visibility="Collapsed"
+                    Click="FeedbackLink_Click"
+                    Margin="{StaticResource EightTopMargin}" />-->
+                            </StackPanel>
+                        </StackPanel>
+                            </PivotItem>
+                        </Pivot>
+
+
+
+                    </Grid>
+
+
+
+                </usercontrols1:BarFlyout.PanelContent>
+
+            </usercontrols1:BarFlyout>
+
+            <ScrollViewer
+                x:Name="canvasScroll"
+            x:Load="False"
+            Canvas.ZIndex="200"
+            Margin="0,73,0,0"
+                Padding="40, 20, 40, 20"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+            ZoomMode="Enabled"
+                  Background="{ThemeResource 24Brush}">
+                <Grid Background="{StaticResource InkCanvasBackground}"
+                        Width="{Binding ElementName=inkCanvas, Path=Width}"
+                        Height="{Binding ElementName=inkCanvas, Path=Height}"
+                                 >
+                  
+                    <usercontrols1:GraphPaperUserControl
+                          Width="{Binding ElementName=inkCanvas, Path=Width}"
+                            Height="{Binding ElementName=inkCanvas, Path=Height}"
+      x:Name="graphPaper" />
+                    
+                  
+                    <canvas:CanvasControl  Background="{StaticResource InkCanvasBackground}"  Width="{Binding ElementName=inkCanvas, Path=Width}"
+                            Height="{Binding ElementName=inkCanvas, Path=Height}" x:Name="CanvasControl" Visibility="{x:Bind IsCanvasRulerVisible, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    <InkCanvas x:Name="inkCanvas"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                     ManipulationDelta="OnInkCanvasManipulationDelta"
+      ManipulationMode="Scale"
+                          ContextRequested="InkCanvas_ContextRequested"
+                               />
+                   
+                    <Canvas x:Name="drawingCanvas"
+                            Width="{Binding ElementName=inkCanvas, Path=Width}"
+                            Height="{Binding ElementName=inkCanvas, Path=Height}"/>
+                    <Canvas x:Name="selectionCanvas"
+                            Width="{Binding ElementName=inkCanvas, Path=Width}"
+                            Height="{Binding ElementName=inkCanvas, Path=Height}"/>
+                </Grid>
+            </ScrollViewer>
+
+            <muxcontrols:TeachingTip x:Name="AutoSaveTip"
+    Title="Ink advanced settings">
+                <muxcontrols:TeachingTip.IconSource>
+                    <muxcontrols:SymbolIconSource Symbol="Setting"/>
+                </muxcontrols:TeachingTip.IconSource>
+                <StackPanel Orientation="Vertical">
+                    <ToggleSwitch Header="Tilt" OffContent="Tilt disabled" OnContent="Tilt enabled" IsOn="True" Toggled="TiltSwitch_Toggled"/>
+                    <ToggleSwitch Header="Pressure" OffContent="Pressure disabled" OnContent="Pressure enabled" IsOn="True" Toggled="PressureSwitch_Toggled"/>
+                    <!--<ComboBox Header="Pen tip shape" Width="200" SelectedItem="Circle" SelectionChanged="ComboBox_SelectionChanged">
+                        <x:String>Circle</x:String>
+                        <x:String>Rectangle</x:String>
+                    </ComboBox>-->
+                </StackPanel>
+            </muxcontrols:TeachingTip>
+            <muxcontrols:TeachingTip x:Name="SaveFileConfirmed"
+    Title="File Saved"
+    ActionButtonContent="Open folder"
+    ActionButtonClick="SaveFileConfirmed_ActionButtonClick">
+            </muxcontrols:TeachingTip>
+            <muxcontrols:TeachingTip x:Name="GridOptions"
+    Title="Gridline options"
+   >
+                <muxcontrols:TeachingTip.Content>
+                    <StackPanel>
+                        <Slider Minimum="10" Maximum="100" ValueChanged="GridLineSlider_ValueChanged" IsEnabled="{x:Bind GLtoggle.IsOn, Mode=OneWay}"></Slider>
+                     
+                            <ToggleSwitch Header="Toggle gridlines" OffContent="Disabled" OnContent="Enabled" IsOn="False" x:Name="GLtoggle" Toggled="GridLinesSwitch_Toggled" />
+                        <StackPanel>
+                            <RadioButton  IsEnabled="{x:Bind GLtoggle.IsOn, Mode=OneWay}" Content="Freeform" IsChecked="True" Checked="GLRadioButton_Checked"/>
+                            <RadioButton  IsEnabled="{x:Bind GLtoggle.IsOn, Mode=OneWay}" x:Name="SX" Content="Snap X" Checked="GLRadioButton_Checked"/>
+                            <RadioButton  IsEnabled="{x:Bind GLtoggle.IsOn, Mode=OneWay}" x:Name="SY" Content="Snap Y" Checked="GLRadioButton_Checked"/>
+                        </StackPanel>
+                    </StackPanel>
+                </muxcontrols:TeachingTip.Content>
+            </muxcontrols:TeachingTip>
+            <Grid x:Name="PanelC"></Grid>
+        </Grid>
+
+        <ContentDialog
+            x:Name="SaveInkConfirmDialog"
+             Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
+        Title="You have unsaved work"
+        PrimaryButtonText="Save"
+        SecondaryButtonText="Continue editing"
+        CloseButtonText="Don't save"
+        DefaultButton="Primary">
+        </ContentDialog>
+        <ContentDialog
+            x:Name="SaveFileDialogFailed"
+             Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
+        Title="The file could not be saved"
+        CloseButtonText="Ok"
+        DefaultButton="Primary">
+        </ContentDialog>
+        <ContentDialog
+            x:Name="SaveFileDialogPrompt"
+             Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
+        Title="Save file"
+        PrimaryButtonText="Save"
+            PrimaryButtonClick="SaveFileDialogPrompt_PrimaryButtonClick"
+        SecondaryButtonText="Save with file picker"
+            SecondaryButtonClick="SaveFileDialogPrompt_SecondaryButtonClick"
+        CloseButtonText="Cancel"
+        DefaultButton="Primary">
+
+            <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <TextBox x:Name="FileNameBox" Header="Enter file name:" PlaceholderText="Enter name" />
+                <TextBlock Text="*Files are saved in the inkdrawings folder in the pictures library."/>
+            </StackPanel>
+
+        </ContentDialog>
+        <ContentDialog
+             Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
+            x:Name="ShareFileDialogPrompt"
+        Title="Save file"
+        PrimaryButtonText="Open share panel"
+            PrimaryButtonClick="SelectImageButton_Click"
+        CloseButtonText="Cancel"
+        DefaultButton="Primary">
+
+            <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <TextBox x:Name="ShareNameBox" Header="Enter Title:" Text="Drawing" />
+                <TextBox x:Name="DescriptionBox" Header="Enter Description:" Text="A drawing i created with Flowpad!"/>
+            </StackPanel>
+
+        </ContentDialog>
+        <ContentDialog
+            x:Name="OpenFileDialogPrompt"
+        Title="Open"
+              CloseButtonText="Cancel"
+             PrimaryButtonText="Open"
+            IsPrimaryButtonEnabled="False"
+            Background="{ThemeResource SystemControlChromeHighAcrylicWindowMediumBrush}"
+            PrimaryButtonClick="OpenFileDialogPrompt_PrimaryButtonClick"
+            SecondaryButtonClick="OpenFileDialogPrompt_SecondaryButtonClick"
+            
+ DefaultButton="Primary"
+           >
+            <Grid>
+                <controls:AdaptiveGridView x:Name="ImageGridView"
+                                   OneRowModeEnabled="False"
+                                   ItemHeight="200"
+                                   DesiredWidth="300"
+                                   SelectionMode="Single"
+                                   IsItemClickEnabled="True"
+                                           ItemTemplate="{StaticResource Photos}"
+                                   />
+
+            </Grid>
+        </ContentDialog>
     </Grid>
-
 </Page>
 
