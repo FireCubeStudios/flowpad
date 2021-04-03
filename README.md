@@ -1,2 +1,2 @@
 # flowpad
-The app is going to experience major redesign
+This project is under unlicense however the assets folder is under MIT license
