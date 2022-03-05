@@ -1,0 +1,36 @@
+﻿<ContentDialog
+    x:Class="flowpad.Views.WhatsNewDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Uid="WhatsNewDialog"
+    mc:Ignorable="d"
+    d:DesignHeight="345"
+    d:DesignWidth="550">
+    <ContentDialog.TitleTemplate>
+        <DataTemplate x:DataType="x:String">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="ms-appx:///Assets/StoreLogo.png" Width="40" Height="40" />
+                <TextBlock Text="{x:Bind}"  VerticalAlignment="Center" />
+            </StackPanel>
+        </DataTemplate>
+    </ContentDialog.TitleTemplate>
+    <ScrollViewer>
+        <StackPanel>
+            <!-- x:Uid="WhatsNew_Body"-->
+            <TextBlock
+               IsTextSelectionEnabled="True"
+                TextWrapping="WrapWholeWords">New Features and changes for update 5.2:
+                <LineBreak/>
+                -Windows 11 visual rejuvanation
+                <LineBreak/>
+                -Removal of broken whiteboard mode and homepage
+                <LineBreak/>
+                -Ability to changce canvas size
+                <LineBreak/>
+                -Bug fixes and performance improvements
+            </TextBlock>
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

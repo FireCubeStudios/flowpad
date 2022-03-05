@@ -1,0 +1,35 @@
+﻿<ContentDialog
+    x:Class="flowpad.Views.FirstRunDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Uid="FirstRunDialog"
+    mc:Ignorable="d"
+    d:DesignHeight="345"
+    d:DesignWidth="550">
+    <ContentDialog.TitleTemplate>
+        <DataTemplate x:DataType="x:String">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="ms-appx:///Assets/StoreLogo.png" Width="40" Height="40" />
+                <TextBlock Text="Flowpad 5.2"  VerticalAlignment="Center" />
+            </StackPanel>
+        </DataTemplate>
+    </ContentDialog.TitleTemplate>
+    <ScrollViewer>
+        <StackPanel>
+            <!---   x:Uid="FirstRun_Body"-->
+            <TextBlock
+             
+                TextWrapping="WrapWholeWords" Text="If you want to submit feedback, get future update progress updates and talk to the developer then go join our discord server
+"/>
+           
+           
+            <HyperlinkButton
+                Content="Discord server"
+                    
+                    NavigateUri="https://discord.gg/3WYcKat"/>
+            <!--  x:Uid="Settings_PrivacyTermsLink"-->
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>
